@@ -1,0 +1,4 @@
+out
+node_modules
+*.vsix
+to-do-list.md
