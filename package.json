@@ -1,19 +1,23 @@
 {
-  "name": "polacode",
-  "displayName": "Polacode",
-  "description": "📸  Polaroid for your code",
-  "version": "0.3.5",
+  "name": "snippetshot",
+  "displayName": "SnippetShot",
+  "description": "Create beautiful code screenshots right inside VS Code.",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
   },
   "publisher": "pnp",
   "keywords": [
-    "polacode",
-    "polaroid",
+    "snippetshot",
     "screenshot",
+    "code screenshot",
     "snippet",
-    "share"
+    "share",
+    "png",
+    "svg",
+    "code snippet",
+    "code snap"
   ],
   "galleryBanner": {
     "color": "#fbfbfb",
@@ -27,7 +31,7 @@
     "vscode": "^1.90.0"
   },
   "activationEvents": [
-    "onWebviewPanel:polacode"
+    "onWebviewPanel:snippetshot"
   ],
   "main": "./out/extension.js",
   "scripts": {
@@ -39,30 +43,30 @@
   "contributes": {
     "commands": [
       {
-        "command": "polacode.activate",
-        "title": "Polacode 📸"
+        "command": "snippetshot.activate",
+        "title": "SnippetShot 📸"
       }
     ],
     "configuration": {
-      "title": "Polacode",
+      "title": "SnippetShot",
       "properties": {
-        "polacode.shadow": {
+        "snippetshot.shadow": {
           "type": "string",
           "description": "Shadow of the snippet node. Use any value for CSS `box-shadow`",
           "default": "rgba(0, 0, 0, 0.55) 0px 20px 68px"
         },
-        "polacode.transparentBackground": {
+        "snippetshot.transparentBackground": {
           "type": "boolean",
           "description": "Transparent background for containers",
           "default": false
         },
-        "polacode.backgroundColor": {
+        "snippetshot.backgroundColor": {
           "type": "string",
           "description": "Background color of snippet container. Use any value for CSS `background-color`",
           "format": "color-hex",
           "default": "#f2f2f2"
         },
-        "polacode.target": {
+        "snippetshot.target": {
           "type": "string",
           "description": "Shoot with or without container",
           "default": "container",
@@ -72,7 +76,7 @@
           ],
           "enumDescriptions": [
             "Shoot with the container.",
-            "Shoot with the snippet alone. If you want transparent padding, use `container` with `\"polacode.transparentBackground\": true`"
+            "Shoot with the snippet alone. If you want transparent padding, use `container` with `\"snippetshot.transparentBackground\": true`"
           ]
         }
       }

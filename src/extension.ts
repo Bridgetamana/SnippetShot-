@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { homedir } from 'os'
 
-const P_TITLE = 'Polacode 📸'
+const P_TITLE = 'SnippetShot 📸'
 
 function writeSerializedBlobToFile(serializeBlob: string, fileName: string) {
   const bytes = new Uint8Array(serializeBlob.split(',').map(n => Number(n)))
@@ -27,18 +27,18 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.postMessage({
         type: 'restore',
         innerHTML: state?.innerHTML,
-        bgColor: context.globalState.get('polacode.bgColor', '#2e3440')
+        bgColor: context.globalState.get('snippetshot.bgColor', '#2e3440')
       })
       const selectionListener = setupSelectionSync(panel)
       panel.onDidDispose(() => selectionListener.dispose())
       setupMessageListeners(panel)
     }
   }
-  context.subscriptions.push(vscode.window.registerWebviewPanelSerializer('polacode', serializer))
+  context.subscriptions.push(vscode.window.registerWebviewPanelSerializer('snippetshot', serializer))
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('polacode.activate', () => {
-      panel = vscode.window.createWebviewPanel('polacode', P_TITLE, vscode.ViewColumn.Two, {
+    vscode.commands.registerCommand('snippetshot.activate', () => {
+      panel = vscode.window.createWebviewPanel('snippetshot', P_TITLE, vscode.ViewColumn.Two, {
         enableScripts: true,
         localResourceRoots: [vscode.Uri.file(path.join(context.extensionPath, 'webview'))]
       })
@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
       setupMessageListeners(panel)
 
       const fontFamily = vscode.workspace.getConfiguration('editor').get<string>('fontFamily')
-      const bgColor = context.globalState.get('polacode.bgColor', '#2e3440') as string
+  const bgColor = context.globalState.get('snippetshot.bgColor', '#2e3440') as string
       panel.webview.postMessage({
         type: 'init',
         fontFamily,
@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration(e => {
-      if (e.affectsConfiguration('polacode') || e.affectsConfiguration('editor')) {
+      if (e.affectsConfiguration('snippetshot') || e.affectsConfiguration('editor')) {
         if (panel) {
           syncSettings(panel)
         }
@@ -97,12 +97,12 @@ export function activate(context: vscode.ExtensionContext) {
         case 'getAndUpdateCacheAndSettings':
           p.webview.postMessage({
             type: 'restoreBgColor',
-            bgColor: context.globalState.get('polacode.bgColor', '#2e3440')
+            bgColor: context.globalState.get('snippetshot.bgColor', '#2e3440')
           })
           syncSettings(p)
           break
         case 'updateBgColor':
-          context.globalState.update('polacode.bgColor', data.bgColor)
+          context.globalState.update('snippetshot.bgColor', data.bgColor)
           break
         case 'invalidPasteContent':
           vscode.window.showInformationMessage(
@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   function syncSettings(p: vscode.WebviewPanel) {
-    const settings = vscode.workspace.getConfiguration('polacode')
+  const settings = vscode.workspace.getConfiguration('snippetshot')
     const editorSettings = vscode.workspace.getConfiguration('editor', null)
     p.webview.postMessage({
       type: 'updateSettings',
