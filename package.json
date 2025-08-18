@@ -56,11 +56,6 @@
           "description": "Shadow of the snippet node. Use any value for CSS `box-shadow`",
           "default": "rgba(0, 0, 0, 0.55) 0px 20px 68px"
         },
-        "snippetshot.transparentBackground": {
-          "type": "boolean",
-          "description": "Transparent background for containers",
-          "default": false
-        },
         "snippetshot.backgroundColor": {
           "type": "string",
           "description": "Background color of snippet container. Use any value for CSS `background-color`",
@@ -68,17 +63,14 @@
           "default": "#f2f2f2"
         },
         "snippetshot.target": {
-          "type": "string",
-          "description": "Shoot with or without container",
-          "default": "container",
-          "enum": [
-            "container",
-            "snippet"
-          ],
-          "enumDescriptions": [
-            "Shoot with the container.",
-            "Shoot with the snippet alone. If you want transparent padding, use `container` with `\"snippetshot.transparentBackground\": true`"
-          ]
+          "type": "null",
+          "description": "Deprecated: always captures container",
+          "default": null
+        },
+        "snippetshot.theme": {
+          "type": "null",
+          "description": "Deprecated: theme selector removed",
+          "default": null
         }
       }
     }

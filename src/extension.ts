@@ -13,7 +13,15 @@ function writeSerializedBlobToFile(serializeBlob: string, fileName: string) {
 export function activate(context: vscode.ExtensionContext) {
   const htmlPath = path.resolve(context.extensionPath, 'webview/index.html')
 
-  let lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png'))
+  const downloadsDir = (() => {
+    const home = homedir()
+    const candidate = path.resolve(home, 'Downloads')
+    try {
+      if (fs.existsSync(candidate)) return candidate
+    } catch {}
+    return home
+  })()
+  let lastUsedImageUri = vscode.Uri.file(path.resolve(downloadsDir, 'codesnippet.png'))
   let panel: vscode.WebviewPanel | undefined
 
   const serializer: vscode.WebviewPanelSerializer = {
@@ -75,19 +83,28 @@ export function activate(context: vscode.ExtensionContext) {
   function setupMessageListeners(p: vscode.WebviewPanel) {
     p.webview.onDidReceiveMessage(({ type, data }) => {
       switch (type) {
-        case 'shoot':
-          vscode.window
-            .showSaveDialog({
-              defaultUri: lastUsedImageUri,
-              filters: { Images: ['png'] }
-            })
-            .then(uri => {
-              if (uri) {
-                writeSerializedBlobToFile(data.serializedBlob, uri.fsPath)
-                lastUsedImageUri = uri
-              }
-            })
+    case 'shoot': {
+          const now = new Date()
+          const pad = (n: number) => n.toString().padStart(2, '0')
+          const yyyy = now.getFullYear()
+          const mm = pad(now.getMonth() + 1)
+          const dd = pad(now.getDate())
+          const hh = pad(now.getHours())
+          const mi = pad(now.getMinutes())
+          const ss = pad(now.getSeconds())
+          const filename = `codesnippet-${yyyy}${mm}${dd}-${hh}${mi}${ss}.png`
+          const filePath = path.resolve(downloadsDir, filename)
+          try {
+            writeSerializedBlobToFile(data.serializedBlob, filePath)
+            lastUsedImageUri = vscode.Uri.file(filePath)
+      p.webview.postMessage({ type: 'saveSuccess', fileName: filename, filePath })
+      vscode.window.showInformationMessage(`Saved to Downloads: ${filename}`)
+          } catch (err) {
+      p.webview.postMessage({ type: 'saveError', message: (err as Error)?.message || String(err) })
+      vscode.window.showErrorMessage('Failed to save image: ' + (err as Error).message)
+          }
           break
+        }
         case 'updateSettingsFromWebview':
           // Non-persistent except bgColor below; reflect new settings immediately
           if (panel) {
@@ -119,9 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
     p.webview.postMessage({
       type: 'updateSettings',
       shadow: settings.get('shadow'),
-      transparentBackground: settings.get('transparentBackground'),
       backgroundColor: settings.get('backgroundColor'),
-      target: settings.get('target'),
       ligature: editorSettings.get('fontLigatures')
     })
   }
@@ -129,12 +144,17 @@ export function activate(context: vscode.ExtensionContext) {
 
 function getHtmlContent(htmlPath: string, webview: vscode.Webview) {
   const htmlContent = fs.readFileSync(htmlPath, 'utf-8')
-  // Convert local script src to webview URIs
-  return htmlContent.replace(/script src=\"([^\"]*)\"/g, (_match, src) => {
-    const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), src))
-    const webSrc = webview.asWebviewUri(onDisk)
-    return `script src=\"${webSrc}\"`
-  })
+  return htmlContent
+    .replace(/script src=\"([^\"]*)\"/g, (_m, src) => {
+      const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), src))
+      const webSrc = webview.asWebviewUri(onDisk)
+      return `script src=\"${webSrc}\"`
+    })
+    .replace(/link href=\"([^\"]*)\"/g, (_m, href) => {
+      const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), href))
+      const webHref = webview.asWebviewUri(onDisk)
+      return `link href=\"${webHref}\"`
+    })
 }
 
 export function deactivate() {}

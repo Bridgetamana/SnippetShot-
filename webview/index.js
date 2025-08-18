@@ -12,9 +12,11 @@
   const snippetNode = document.getElementById('snippet')
   const snippetContainerNode = document.getElementById('snippet-container')
   const obturateur = document.getElementById('save')
-  const targetSel = document.getElementById('targetSel')
-  const transparentChk = document.getElementById('transparentChk')
+  const saveBtn = document.getElementById('saveBtn')
+  const saveBtnText = document.getElementById('saveBtnText')
   const bgPicker = document.getElementById('bgPicker')
+  const radiusContainer = document.getElementById('radiusContainer')
+  const radiusSnippet = document.getElementById('radiusSnippet')
 
   snippetContainerNode.style.opacity = '1'
   const oldState = vscode.getState();
@@ -73,26 +75,27 @@
 
     // update backdrop color
     if (isDark(snippetBgColor)) {
-      snippetContainerNode.style.backgroundColor = '#f2f2f2'
+  snippetContainerNode.style.backgroundColor = '#f2f2f2'
     } else {
       snippetContainerNode.style.background = 'none'
     }
   }
 
-  // UI bindings
-  targetSel.addEventListener('change', () => {
-    target = targetSel.value
-    vscode.postMessage({ type: 'updateSettingsFromWebview', data: { target } })
-  })
-  transparentChk.addEventListener('change', () => {
-    transparentBackground = transparentChk.checked
-    vscode.postMessage({ type: 'updateSettingsFromWebview', data: { transparentBackground } })
-  })
+  // UI bindings (reduced)
   bgPicker.addEventListener('input', () => {
     backgroundColor = bgPicker.value
     snippetContainerNode.style.backgroundColor = backgroundColor
     vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } })
   })
+
+  // Radius and border controls
+  radiusContainer.addEventListener('input', () => {
+    document.documentElement.style.setProperty('--container-radius', `${radiusContainer.value}px`)
+  })
+  radiusSnippet.addEventListener('input', () => {
+    document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`)
+  })
+  // Border controls removed
 
   function getMinIndent(code) {
     const arr = code.split('\n')
@@ -145,24 +148,25 @@
     vscode.setState({ innerHTML })
   })
 
-  obturateur.addEventListener('click', () => {
-    if (target === 'container') {
-      shootAll() 
-    } else {
-      shootSnippet()
+  let saveLabelTimer = null
+  ;(saveBtn || obturateur).addEventListener('click', () => {
+    if (saveBtn) {
+      saveBtn.disabled = true
+      if (saveBtnText) saveBtnText.textContent = 'Saving…'
     }
+    shootAll()
   })
 
   function shootAll() {
-    const width = snippetContainerNode.offsetWidth * 2
-    const height = snippetContainerNode.offsetHeight * 2
+  const width = snippetContainerNode.offsetWidth * 2
+  const height = snippetContainerNode.offsetHeight * 2
     const config = {
       width,
       height,
       style: {
         transform: 'scale(2)',
         'transform-origin': 'center',
-        background: getRgba(backgroundColor, transparentBackground)
+    background: getRgba(backgroundColor || '#0b1220', transparentBackground)
       }
     }
 
@@ -179,32 +183,7 @@
     })
   }
 
-  function shootSnippet() {
-    const width = snippetNode.offsetWidth * 2
-    const height = snippetNode.offsetHeight * 2
-    const config = {
-      width,
-      height,
-      style: {
-        transform: 'scale(2)',
-        'transform-origin': 'center',
-        padding: 0,
-        background: 'none'
-      }
-    }
-
-    // Hide resizer before capture
-    snippetNode.style.resize = 'none'
-    snippetContainerNode.style.resize = 'none'
-
-    domtoimage.toBlob(snippetContainerNode, config).then(blob => {
-      snippetNode.style.resize = ''
-      snippetContainerNode.style.resize = ''
-      serializeBlob(blob, serializedBlob => {
-        shoot(serializedBlob)
-      })
-    })
-  }
+  // snippet-only capture removed
 
   let isInAnimation = false
 
@@ -239,14 +218,12 @@
         snippetNode.innerHTML = initialHtml
         vscode.setState({ innerHTML: initialHtml })
 
-        // update backdrop color, using bgColor from last pasted snippet
-        // cannot deduce from initialHtml since it's always using Nord color
+  // update backdrop color, using bgColor from last pasted snippet
         if (isDark(bgColor)) {
           snippetContainerNode.style.backgroundColor = '#f2f2f2'
         } else {
           snippetContainerNode.style.background = 'none'
         }
-
       } else if (e.data.type === 'update') {
         document.execCommand('paste')
       } else if (e.data.type === 'restore') {
@@ -256,22 +233,34 @@
         updateEnvironment(e.data.bgColor)
       } else if (e.data.type === 'updateSettings') {
         snippetNode.style.boxShadow = e.data.shadow
-        target = e.data.target
-        transparentBackground = e.data.transparentBackground
         snippetContainerNode.style.backgroundColor = e.data.backgroundColor
         backgroundColor = e.data.backgroundColor
-  // reflect to UI
-  targetSel.value = target
-  transparentChk.checked = !!transparentBackground
-  bgPicker.value = backgroundColor
+        bgPicker.value = backgroundColor || '#0b1220'
         if (e.data.ligature) {
           snippetNode.style.fontVariantLigatures = 'normal'
         } else {
           snippetNode.style.fontVariantLigatures = 'none'
         }
+      } else if (e.data.type === 'saveSuccess') {
+        if (saveBtnText) saveBtnText.textContent = 'Saved'
+        if (saveBtn) {
+          saveBtn.disabled = false
+        }
+        if (saveLabelTimer) {
+          clearTimeout(saveLabelTimer)
+        }
+        saveLabelTimer = setTimeout(() => {
+          if (saveBtnText) saveBtnText.textContent = 'Save PNG'
+        }, 2000)
+      } else if (e.data.type === 'saveError') {
+        if (saveBtnText) saveBtnText.textContent = 'Save PNG'
+        if (saveBtn) {
+          saveBtn.disabled = false
+        }
       }
     }
   })
+
 })()
 
 function getRgba(hex, transparentBackground) {
@@ -282,3 +271,5 @@ function getRgba(hex, transparentBackground) {
   const a = transparentBackground ? 0 : 1
   return `rgba(${r}, ${g}, ${b}, ${a})`
 }
+
+// hexToRgba helper removed
