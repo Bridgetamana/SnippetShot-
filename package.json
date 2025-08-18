@@ -2,10 +2,10 @@
   "name": "polacode",
   "displayName": "Polacode",
   "description": "📸  Polaroid for your code",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "repository": {
     "type": "git",
-    "url": "https://github.com/octref/polacode.git"
+    "url": "https://github.com/Bridgetamana/SnippetShot-.git"
   },
   "publisher": "pnp",
   "keywords": [
@@ -24,13 +24,18 @@
     "Other"
   ],
   "engines": {
-    "vscode": "^1.32.0"
+    "vscode": "^1.90.0"
   },
   "activationEvents": [
-    "onCommand:polacode.activate",
     "onWebviewPanel:polacode"
   ],
-  "main": "./src/extension",
+  "main": "./out/extension.js",
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "vscode:prepublish": "npm run compile",
+    "lint": "echo 'add linter later'"
+  },
   "contributes": {
     "commands": [
       {
@@ -74,7 +79,8 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^11.12.0",
-    "@types/vscode": "^1.32.0"
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.4.0"
   }
 }

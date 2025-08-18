@@ -12,6 +12,9 @@
   const snippetNode = document.getElementById('snippet')
   const snippetContainerNode = document.getElementById('snippet-container')
   const obturateur = document.getElementById('save')
+  const targetSel = document.getElementById('targetSel')
+  const transparentChk = document.getElementById('transparentChk')
+  const bgPicker = document.getElementById('bgPicker')
 
   snippetContainerNode.style.opacity = '1'
   const oldState = vscode.getState();
@@ -75,6 +78,21 @@
       snippetContainerNode.style.background = 'none'
     }
   }
+
+  // UI bindings
+  targetSel.addEventListener('change', () => {
+    target = targetSel.value
+    vscode.postMessage({ type: 'updateSettingsFromWebview', data: { target } })
+  })
+  transparentChk.addEventListener('change', () => {
+    transparentBackground = transparentChk.checked
+    vscode.postMessage({ type: 'updateSettingsFromWebview', data: { transparentBackground } })
+  })
+  bgPicker.addEventListener('input', () => {
+    backgroundColor = bgPicker.value
+    snippetContainerNode.style.backgroundColor = backgroundColor
+    vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } })
+  })
 
   function getMinIndent(code) {
     const arr = code.split('\n')
@@ -242,6 +260,10 @@
         transparentBackground = e.data.transparentBackground
         snippetContainerNode.style.backgroundColor = e.data.backgroundColor
         backgroundColor = e.data.backgroundColor
+  // reflect to UI
+  targetSel.value = target
+  transparentChk.checked = !!transparentBackground
+  bgPicker.value = backgroundColor
         if (e.data.ligature) {
           snippetNode.style.fontVariantLigatures = 'normal'
         } else {
