@@ -22,6 +22,17 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Compile TypeScript",
+			"type": "shell",
+			"command": "npm run compile",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }
