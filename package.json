@@ -7,6 +7,7 @@
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
   },
+  "license": "MIT",
   "publisher": "pnp",
   "keywords": [
     "snippetshot",
