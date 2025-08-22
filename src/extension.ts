@@ -3,7 +3,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { homedir } from 'os'
 
-const P_TITLE = 'SnippetShot 📸'
+const P_TITLE = 'SnippetShot'
 
 function writeSerializedBlobToFile(serializeBlob: string, fileName: string) {
   const bytes = new Uint8Array(serializeBlob.split(',').map(n => Number(n)))
@@ -35,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.postMessage({
         type: 'restore',
         innerHTML: state?.innerHTML,
-        bgColor: context.globalState.get('snippetshot.bgColor', '#2e3440')
+        bgColor: context.globalState.get('snippetshot.bgColor')
       })
       const selectionListener = setupSelectionSync(panel)
       panel.onDidDispose(() => selectionListener.dispose())
@@ -59,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
       setupMessageListeners(panel)
 
       const fontFamily = vscode.workspace.getConfiguration('editor').get<string>('fontFamily')
-  const bgColor = context.globalState.get('snippetshot.bgColor', '#2e3440') as string
+      const bgColor = context.globalState.get('snippetshot.bgColor')
       panel.webview.postMessage({
         type: 'init',
         fontFamily,
@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
         case 'getAndUpdateCacheAndSettings':
           p.webview.postMessage({
             type: 'restoreBgColor',
-            bgColor: context.globalState.get('snippetshot.bgColor', '#2e3440')
+            bgColor: context.globalState.get('snippetshot.bgColor')
           })
           syncSettings(p)
           break

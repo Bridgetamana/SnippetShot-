@@ -6,77 +6,78 @@
     />
     <style>
       :root {
-        --panel-padding: 48px;
-        --container-radius: 16px;
-        --snippet-radius: 12px;
-        --shadow-snippet: rgba(0, 0, 0, 0.45) 0 16px 42px;
-        --bg: #0b1220;
-        --container-glass: rgba(255, 255, 255, 0.08);
-        --border: rgba(255, 255, 255, 0.12);
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --accent: #60a5fa;
+        --panel-padding: 24px;
+        --snippet-radius: 8px;
+        --shadow-snippet: rgba(0, 0, 0, 0.25) 0 8px 24px;
+        --bg: #020617;
+        --container-glass: rgba(255, 255, 255, 0.05);
+        --border: rgba(255, 255, 255, 0.1);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
       }
       * {
         box-sizing: border-box;
       }
-      html {
-        padding-top: 40px;
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
       }
       body {
         display: flex;
-        flex-flow: column;
+        flex-direction: column;
+        justify-content: center;
         align-items: center;
         color: var(--text);
         background-color: var(--bg);
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+        font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
           Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji",
           "Segoe UI Emoji";
       }
 
       .toolbar {
         position: fixed;
-        top: 6px;
-        left: 12px;
-        right: 12px;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
-        flex-wrap: wrap;
         gap: 0.75rem;
         align-items: center;
-        padding: 0.5rem 0.75rem;
-        border-radius: 16px;
-        background: rgba(17, 24, 39, 0.6);
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.7);
         -webkit-backdrop-filter: blur(10px) saturate(140%);
         backdrop-filter: blur(10px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        z-index: 10;
       }
       .toolbar label {
-        font-size: 12px;
+        font-size: 13px;
         color: var(--muted);
         display: inline-flex;
-        gap: 0.35rem;
+        gap: 0.5rem;
         align-items: center;
       }
       .toolbar select,
       .toolbar input[type="color"],
       .toolbar input[type="range"] {
-        background: rgba(31, 41, 55, 0.6);
+        background: rgba(30, 41, 59, 0.8);
         color: var(--text);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 0.25rem 0.5rem;
+        font-size: 12px;
+      }
+      .toolbar input[type="color"] {
+        padding: 0.15rem;
+        width: 24px;
+        height: 24px;
       }
       .toolbar input[type="checkbox"] {
         accent-color: var(--accent);
-      }
-      @media (max-width: 720px) {
-        .toolbar {
-          border-radius: 12px;
-        }
-        .toolbar label {
-          width: calc(50% - 0.75rem);
-        }
       }
 
       #snippet-container {
@@ -85,100 +86,92 @@
         align-items: center;
         overflow: hidden;
         resize: both;
-        width: calc(100% - 4rem);
-        min-height: 260px;
+        width: auto;
+        min-width: 300px;
+        max-width: 90%;
+        min-height: 200px;
         padding: var(--panel-padding);
-        border-radius: var(--container-radius);
+        border-radius: 16px; /* This is for the outer container, keeping it simple */
         opacity: 0;
-        transition: opacity 0.4s;
+        transition: opacity 0.4s ease-in-out;
         background: var(--container-glass);
-        -webkit-backdrop-filter: blur(16px) saturate(140%);
-        backdrop-filter: blur(16px) saturate(140%);
-        border: var(--container-border-width, 1px) solid var(--border);
+        border: 1px solid var(--border);
       }
       #snippet {
-        overflow: hidden;
-        resize: both;
+        overflow: auto;
+        resize: none; /* Resizing the outer container is enough */
         display: flex;
-        padding: 18px;
-        margin: 48px 0;
-        width: calc(100% - 8rem);
+        padding: 24px;
+        margin: 0;
+        width: 100%;
         border-radius: var(--snippet-radius);
         box-shadow: var(--shadow-snippet);
       }
       #snippet > div {
         display: flex;
-        flex-flow: column nowrap;
+        flex-direction: column;
         justify-content: center;
-        max-width: 100%;
-        white-space: pre-wrap !important;
+        width: 100%;
+        white-space: pre-wrap;
         word-break: break-all;
+        text-align: center;
       }
       #snippet > div > div {
-        display: flex;
-        flex-wrap: wrap;
+        display: inline-block;
+        text-align: left;
       }
 
       #save-container {
         margin-top: 24px;
-        margin-bottom: 60px;
+        margin-bottom: 24px;
         text-align: center;
       }
       .btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.6rem 0.9rem;
+        gap: 0.6rem;
+        padding: 0.7rem 1.2rem;
         border-radius: 12px;
         color: var(--text);
-        background: rgba(37, 99, 235, 0.15);
-        border: 1px solid rgba(96, 165, 250, 0.35);
+        background: #1e40af;
+        border: none;
         cursor: pointer;
         user-select: none;
-        -webkit-backdrop-filter: blur(8px) saturate(140%);
-        backdrop-filter: blur(8px) saturate(140%);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        transition: background 0.2s, transform 0.2s;
       }
       .btn:hover {
-        background: rgba(37, 99, 235, 0.25);
+        background: #2563eb;
+        transform: translateY(-2px);
+      }
+      .btn:active {
+        transform: translateY(0);
       }
       .btn svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
       }
 
       .obturateur {
-        width: 64px;
-        height: 64px;
-      }
-      .obturateur * {
-        transition: stroke 0.4s;
-      }
-      .obturateur:not(.filling) path {
-        opacity: 0.5;
+        display: none !important; /* Hiding the complex SVG animation for a cleaner look */
       }
     </style>
   </head>
 
   <body>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
     <div class="toolbar">
-      <label
-        >Bg color
+      <label>
+        Background
         <input type="color" id="bgPicker" value="#0b1220" />
       </label>
-      <label title="Container corner radius">
-        Container radius
-        <input
-          type="range"
-          id="radiusContainer"
-          min="0"
-          max="32"
-          step="1"
-          value="16"
-        />
-      </label>
       <label title="Snippet corner radius">
-        Snippet radius
+        Corner radius
         <input
           type="range"
           id="radiusSnippet"
@@ -189,17 +182,17 @@
         />
       </label>
     </div>
-    <div id="snippet-container" style="--container-border-width: 1px">
+    <div id="snippet-container">
       <div
         id="snippet"
         style="
           color: #d8dee9;
           background-color: #2e3440;
-          font-family: SFMono-Regular, Consolas, DejaVu Sans Mono, Ubuntu Mono,
-            Liberation Mono, Menlo, Courier, monospace;
+          font-family: 'SF Mono', SFMono-Regular, Consolas, 'DejaVu Sans Mono', Ubuntu Mono,
+            'Liberation Mono', Menlo, Courier, monospace;
           font-weight: normal;
-          font-size: 12px;
-          line-height: 18px;
+          font-size: 13px;
+          line-height: 20px;
           white-space: pre;
         "
       >
@@ -208,52 +201,24 @@
           style="
             color: #d8dee9;
             background-color: #2e3440;
-            font-family: Input Mono;
+            font-family: 'Inter', sans-serif;
             font-weight: normal;
-            font-size: 12px;
-            line-height: 18px;
-            white-space: pre;
+            font-size: 14px;
+            line-height: 22px;
+            white-space: pre-wrap;
           "
         >
           <div>
-            <span style="color: #8fbcbb">console</span
-            ><span style="color: #eceff4">.</span
-            ><span style="color: #88c0d0">log</span
-            ><span style="color: #d8dee9">(</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #a3be8c">0. Run command `SnippetShot 📸`</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #d8dee9">)</span>
+            <span style="font-size: 24px; font-weight: bold; color: #e2e8f0;">Ready to create a SnippetShot?</span>
+          </div>
+          <div style="margin-top: 16px;">
+            <span style="color: #94a3b8;">1. Copy some code from your editor.</span>
           </div>
           <div>
-            <span style="color: #8fbcbb">console</span
-            ><span style="color: #eceff4">.</span
-            ><span style="color: #88c0d0">log</span
-            ><span style="color: #d8dee9">(</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #a3be8c">1. Copy some code</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #d8dee9">)</span>
+            <span style="color: #94a3b8;">2. Paste it here.</span>
           </div>
           <div>
-            <span style="color: #8fbcbb">console</span
-            ><span style="color: #eceff4">.</span
-            ><span style="color: #88c0d0">log</span
-            ><span style="color: #d8dee9">(</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #a3be8c">2. Paste into SnippetShot view</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #d8dee9">)</span>
-          </div>
-          <div>
-            <span style="color: #8fbcbb">console</span
-            ><span style="color: #eceff4">.</span
-            ><span style="color: #88c0d0">log</span
-            ><span style="color: #d8dee9">(</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #a3be8c">3. Click the button 📸</span
-            ><span style="color: #eceff4">'</span
-            ><span style="color: #d8dee9">)</span>
+            <span style="color: #94a3b8;">3. Click the 📸 button to save!</span>
           </div>
         </div>
       </div>
@@ -265,7 +230,7 @@
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          stroke-width="1.8"
+          stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
           aria-hidden="true"
@@ -275,99 +240,8 @@
           />
           <circle cx="12" cy="13" r="4" />
         </svg>
-  <span id="saveBtnText">Save PNG</span>
+        <span id="saveBtnText">Save as PNG</span>
       </button>
-
-      <svg
-        id="save"
-        class="obturateur"
-        width="132px"
-        height="132px"
-        viewBox="0 0 132 132"
-        version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        style="display: none"
-      >
-        <g
-          id="Page-1"
-          stroke="none"
-          stroke-width="1"
-          fill="none"
-          fill-rule="evenodd"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <g
-            id="obturateur"
-            transform="translate(2.000000, 2.000000)"
-            stroke-width="3"
-          >
-            <circle id="Oval" stroke="#4C566A" cx="64" cy="64" r="64"></circle>
-            <circle
-              id="Oval"
-              stroke="#4C566A"
-              cx="64"
-              cy="64"
-              r="60.9706667"
-            ></circle>
-            <circle
-              id="Oval"
-              stroke="#4C566A"
-              cx="64"
-              cy="64"
-              r="51.8734222"
-            ></circle>
-            <circle
-              id="Oval"
-              stroke="#D8DEE9"
-              cx="64"
-              cy="64"
-              r="28.2595556"
-            ></circle>
-            <path
-              d="M17.0965333,86.1788444 L40.5667556,48.1998222"
-              id="Shape"
-              stroke="#EBCB8B"
-            ></path>
-            <path
-              d="M15.1509333,46.5180444 L58.6026667,36.2574222"
-              id="Shape"
-              stroke="#A3BE8C"
-            ></path>
-            <path
-              d="M41.8204444,17.0965333 L79.8001778,40.5660444"
-              id="Shape"
-              stroke="#8FBCBB"
-            ></path>
-            <path
-              d="M81.4819556,15.1502222 L91.7425778,58.6019556"
-              id="Shape"
-              stroke="#88C0D0"
-            ></path>
-            <path
-              d="M110.902756,41.8197333 L87.4332444,79.8001778"
-              id="Shape"
-              stroke="#81A1C1"
-            ></path>
-            <path
-              d="M112.848356,81.4819556 L69.3973333,91.7418667"
-              id="Shape"
-              stroke="#B48EAD"
-            ></path>
-            <path
-              d="M86.1795556,110.902756 L48.1998222,87.4332444"
-              id="Shape"
-              stroke="#BF616A"
-            ></path>
-            <path
-              d="M46.5187556,112.848356 L36.2574222,69.3973333"
-              id="Shape"
-              stroke="#D08770"
-            ></path>
-          </g>
-        </g>
-      </svg>
     </div>
 
     <script src="./dom2image.js"></script>

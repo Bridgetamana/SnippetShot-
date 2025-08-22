@@ -1,9 +1,7 @@
 ;(function() {
   const vscode = acquireVsCodeApi()
 
-  let target = 'container'
-  let transparentBackground = false
-  let backgroundColor = '#f2f2f2'
+  let backgroundColor = '#020617'
 
   vscode.postMessage({
     type: 'getAndUpdateCacheAndSettings'
@@ -11,11 +9,9 @@
 
   const snippetNode = document.getElementById('snippet')
   const snippetContainerNode = document.getElementById('snippet-container')
-  const obturateur = document.getElementById('save')
   const saveBtn = document.getElementById('saveBtn')
   const saveBtnText = document.getElementById('saveBtnText')
   const bgPicker = document.getElementById('bgPicker')
-  const radiusContainer = document.getElementById('radiusContainer')
   const radiusSnippet = document.getElementById('radiusSnippet')
 
   snippetContainerNode.style.opacity = '1'
@@ -25,9 +21,8 @@
   }
 
   const getInitialHtml = fontFamily => {
-    const cameraWithFlashEmoji = String.fromCodePoint(128248)
-    const monoFontStack = `${fontFamily},SFMono-Regular,Consolas,DejaVu Sans Mono,Ubuntu Mono,Liberation Mono,Menlo,Courier,monospace`
-    return `<meta charset="utf-8"><div style="color: #d8dee9;background-color: #2e3440; font-family: ${monoFontStack};font-weight: normal;font-size: 12px;line-height: 18px;white-space: pre;"><div><span style="color: #8fbcbb;">console</span><span style="color: #eceff4;">.</span><span style="color: #88c0d0;">log</span><span style="color: #d8dee9;">(</span><span style="color: #eceff4;">'</span><span style="color: #a3be8c;">0. Run command \`SnippetShot ${cameraWithFlashEmoji}\`</span><span style="color: #eceff4;">'</span><span style="color: #d8dee9;">)</span></div><div><span style="color: #8fbcbb;">console</span><span style="color: #eceff4;">.</span><span style="color: #88c0d0;">log</span><span style="color: #d8dee9;">(</span><span style="color: #eceff4;">'</span><span style="color: #a3be8c;">1. Copy some code</span><span style="color: #eceff4;">'</span><span style="color: #d8dee9;">)</span></div><div><span style="color: #8fbcbb;">console</span><span style="color: #eceff4;">.</span><span style="color: #88c0d0;">log</span><span style="color: #d8dee9;">(</span><span style="color: #eceff4;">'</span><span style="color: #a3be8c;">2. Paste into SnippetShot view</span><span style="color: #eceff4;">'</span><span style="color: #d8dee9;">)</span></div><div><span style="color: #8fbcbb;">console</span><span style="color: #eceff4;">.</span><span style="color: #88c0d0;">log</span><span style="color: #d8dee9;">(</span><span style="color: #eceff4;">'</span><span style="color: #a3be8c;">3. Click the button ${cameraWithFlashEmoji}</span><span style="color: #eceff4;">'</span><span style="color: #d8dee9;">)</span></div></div></div>`
+    const monoFontStack = `'SF Mono', ${fontFamily}, SFMono-Regular, Consolas, 'DejaVu Sans Mono', Ubuntu Mono, 'Liberation Mono', Menlo, Courier, monospace`
+    return `<meta charset="utf-8"><div style="color: #d8dee9;background-color: #2e3440; font-family: ${monoFontStack};font-weight: normal;font-size: 13px;line-height: 20px;white-space: pre; text-align: left;"><div><span style="font-family: 'Inter', sans-serif; font-size: 22px; font-weight: bold; color: #e2e8f0;">Ready to create a SnippetShot?</span></div><div style="margin-top: 16px; font-family: 'Inter', sans-serif; color: #94a3b8;"><span>1. Copy some code from your editor.</span></div><div style="font-family: 'Inter', sans-serif; color: #94a3b8;"><span>2. Paste it here.</span></div><div style="font-family: 'Inter', sans-serif; color: #94a3b8;"><span>3. Click the 📸 button to save!</span></div></div>`
   }
 
   const serializeBlob = (blob, cb) => {
@@ -36,10 +31,6 @@
     fileReader.onload = () => {
       const bytes = new Uint8Array(fileReader.result)
       cb(Array.from(bytes).join(','))
-    }
-    function getBrightness(color) {
-      const rgb = this.toRgb()
-      return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000
     }
 
     fileReader.readAsArrayBuffer(blob)
@@ -54,16 +45,6 @@
     })
   }
 
-  function getBrightness(hexColor) {
-    const rgb = parseInt(hexColor.slice(1), 16)
-    const r = (rgb >> 16) & 0xff
-    const g = (rgb >> 8) & 0xff
-    const b = (rgb >> 0) & 0xff
-    return (r * 299 + g * 587 + b * 114) / 1000
-  }
-  function isDark(hexColor) {
-    return getBrightness(hexColor) < 128
-  }
   function getSnippetBgColor(html) {
     const match = html.match(/background-color: (#[a-fA-F0-9]+)/)
     return match ? match[1] : undefined;
@@ -71,31 +52,21 @@
 
   function updateEnvironment(snippetBgColor) {
     // update snippet bg color
-    document.getElementById('snippet').style.backgroundColor = snippetBgColor
-
-    // update backdrop color
-    if (isDark(snippetBgColor)) {
-  snippetContainerNode.style.backgroundColor = '#f2f2f2'
-    } else {
-      snippetContainerNode.style.background = 'none'
+    if (snippetBgColor) {
+      document.getElementById('snippet').style.backgroundColor = snippetBgColor
     }
   }
 
-  // UI bindings (reduced)
+  // UI bindings
   bgPicker.addEventListener('input', () => {
     backgroundColor = bgPicker.value
-    snippetContainerNode.style.backgroundColor = backgroundColor
+    document.body.style.backgroundColor = backgroundColor
     vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } })
   })
 
-  // Radius and border controls
-  radiusContainer.addEventListener('input', () => {
-    document.documentElement.style.setProperty('--container-radius', `${radiusContainer.value}px`)
-  })
   radiusSnippet.addEventListener('input', () => {
     document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`)
   })
-  // Border controls removed
 
   function getMinIndent(code) {
     const arr = code.split('\n')
@@ -130,12 +101,6 @@
 
     const snippetBgColor = getSnippetBgColor(innerHTML)
     if (snippetBgColor) {
-      vscode.postMessage({
-        type: 'updateBgColor',
-        data: {
-          bgColor: snippetBgColor
-        }
-      })
       updateEnvironment(snippetBgColor)
     }
 
@@ -149,24 +114,22 @@
   })
 
   let saveLabelTimer = null
-  ;(saveBtn || obturateur).addEventListener('click', () => {
-    if (saveBtn) {
-      saveBtn.disabled = true
-      if (saveBtnText) saveBtnText.textContent = 'Saving…'
-    }
+  saveBtn.addEventListener('click', () => {
+    saveBtn.disabled = true
+    saveBtnText.textContent = 'Saving…'
     shootAll()
   })
 
   function shootAll() {
-  const width = snippetContainerNode.offsetWidth * 2
-  const height = snippetContainerNode.offsetHeight * 2
+    const width = snippetContainerNode.offsetWidth * 2
+    const height = snippetContainerNode.offsetHeight * 2
     const config = {
       width,
       height,
       style: {
         transform: 'scale(2)',
         'transform-origin': 'center',
-    background: getRgba(backgroundColor || '#0b1220', transparentBackground)
+        background: backgroundColor || '#020617'
       }
     }
 
@@ -183,32 +146,6 @@
     })
   }
 
-  // snippet-only capture removed
-
-  let isInAnimation = false
-
-  obturateur.addEventListener('mouseover', () => {
-    if (!isInAnimation) {
-      isInAnimation = true
-
-      new Vivus(
-        'save',
-        {
-          duration: 40,
-          onReady: () => {
-            obturateur.className = 'obturateur filling'
-          }
-        },
-        () => {
-          setTimeout(() => {
-            isInAnimation = false
-            obturateur.className = 'obturateur'
-          }, 700)
-        }
-      )
-    }
-  })
-
   window.addEventListener('message', e => {
     if (e) {
       if (e.data.type === 'init') {
@@ -218,45 +155,46 @@
         snippetNode.innerHTML = initialHtml
         vscode.setState({ innerHTML: initialHtml })
 
-  // update backdrop color, using bgColor from last pasted snippet
-        if (isDark(bgColor)) {
-          snippetContainerNode.style.backgroundColor = '#f2f2f2'
-        } else {
-          snippetContainerNode.style.background = 'none'
+        if (bgColor) {
+          backgroundColor = bgColor
+          bgPicker.value = bgColor
+          document.body.style.backgroundColor = bgColor
         }
+
       } else if (e.data.type === 'update') {
         document.execCommand('paste')
       } else if (e.data.type === 'restore') {
         snippetNode.innerHTML = e.data.innerHTML
-        updateEnvironment(e.data.bgColor)
+        if (e.data.bgColor) {
+          backgroundColor = e.data.bgColor
+          bgPicker.value = e.data.bgColor
+          document.body.style.backgroundColor = e.data.bgColor
+        }
       } else if (e.data.type === 'restoreBgColor') {
-        updateEnvironment(e.data.bgColor)
+        if (e.data.bgColor) {
+          backgroundColor = e.data.bgColor
+          bgPicker.value = e.data.bgColor
+          document.body.style.backgroundColor = e.data.bgColor
+        }
       } else if (e.data.type === 'updateSettings') {
         snippetNode.style.boxShadow = e.data.shadow
-        snippetContainerNode.style.backgroundColor = e.data.backgroundColor
-        backgroundColor = e.data.backgroundColor
-        bgPicker.value = backgroundColor || '#0b1220'
         if (e.data.ligature) {
           snippetNode.style.fontVariantLigatures = 'normal'
         } else {
           snippetNode.style.fontVariantLigatures = 'none'
         }
       } else if (e.data.type === 'saveSuccess') {
-        if (saveBtnText) saveBtnText.textContent = 'Saved'
-        if (saveBtn) {
-          saveBtn.disabled = false
-        }
+        saveBtnText.textContent = 'Saved!'
+        saveBtn.disabled = false
         if (saveLabelTimer) {
           clearTimeout(saveLabelTimer)
         }
         saveLabelTimer = setTimeout(() => {
-          if (saveBtnText) saveBtnText.textContent = 'Save PNG'
+          saveBtnText.textContent = 'Save as PNG'
         }, 2000)
       } else if (e.data.type === 'saveError') {
-        if (saveBtnText) saveBtnText.textContent = 'Save PNG'
-        if (saveBtn) {
-          saveBtn.disabled = false
-        }
+        saveBtnText.textContent = 'Save as PNG'
+        saveBtn.disabled = false
       }
     }
   })
@@ -271,5 +209,3 @@ function getRgba(hex, transparentBackground) {
   const a = transparentBackground ? 0 : 1
   return `rgba(${r}, ${g}, ${b}, ${a})`
 }
-
-// hexToRgba helper removed
