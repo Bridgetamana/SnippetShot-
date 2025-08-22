@@ -89,9 +89,9 @@
         width: auto;
         min-width: 300px;
         max-width: 90%;
-        min-height: 200px;
+        height: auto; 
         padding: var(--panel-padding);
-        border-radius: 16px; /* This is for the outer container, keeping it simple */
+        border-radius: 16px; 
         opacity: 0;
         transition: opacity 0.4s ease-in-out;
         background: var(--container-glass);
@@ -169,6 +169,10 @@
       <label>
         Background
         <input type="color" id="bgPicker" value="#0b1220" />
+      </label>
+      <label title="Show line numbers">
+        Line numbers
+        <input type="checkbox" id="lineNumbers" checked />
       </label>
       <label title="Snippet corner radius">
         Corner radius
