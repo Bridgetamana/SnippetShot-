@@ -13,6 +13,7 @@
   const saveBtnText = document.getElementById('saveBtnText')
   const bgPicker = document.getElementById('bgPicker')
   const radiusSnippet = document.getElementById('radiusSnippet')
+  const lineNumbersCheckbox = document.getElementById('lineNumbers')
 
   snippetContainerNode.style.opacity = '1'
   const oldState = vscode.getState();
@@ -68,6 +69,38 @@
     document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`)
   })
 
+  lineNumbersCheckbox.addEventListener('change', () => {
+    toggleLineNumbers(lineNumbersCheckbox.checked);
+  });
+
+  function toggleLineNumbers(show) {
+    const snippet = document.getElementById('snippet');
+    const lineContainer = snippet.querySelector('div');
+    if (!lineContainer) return;
+
+    // Always remove existing line numbers to prevent duplicates
+    const existingNumbers = snippet.querySelectorAll('.line-number');
+    existingNumbers.forEach(n => n.remove());
+    const allLinesForStyleReset = Array.from(snippet.querySelectorAll('div > div'));
+    allLinesForStyleReset.forEach(l => {
+      if (l.style.display === 'flex') l.style.display = '';
+    });
+
+    if (show) {
+      const lines = Array.from(lineContainer.children).filter(c => c.tagName === 'DIV');
+      for (let i = 0; i < lines.length; i++) {
+        const number = document.createElement('span');
+        number.style.color = '#888';
+        number.style.paddingRight = '1em';
+        number.style.userSelect = 'none';
+        number.className = 'line-number';
+        number.innerText = i + 1;
+        lines[i].style.display = 'flex';
+        lines[i].prepend(number);
+      }
+    }
+  }
+
   function getMinIndent(code) {
     const arr = code.split('\n')
 
@@ -95,22 +128,23 @@
 
   document.addEventListener('paste', e => {
     const innerHTML = e.clipboardData.getData('text/html')
-
     const code = e.clipboardData.getData('text/plain')
     const minIndent = getMinIndent(code)
-
     const snippetBgColor = getSnippetBgColor(innerHTML)
+
     if (snippetBgColor) {
       updateEnvironment(snippetBgColor)
     }
 
+    let content;
     if (minIndent !== 0) {
-      snippetNode.innerHTML = stripInitialIndent(innerHTML, minIndent)
+      content = stripInitialIndent(innerHTML, minIndent)
     } else {
-      snippetNode.innerHTML = innerHTML
+      content = innerHTML
     }
-
-    vscode.setState({ innerHTML })
+    snippetNode.innerHTML = content
+    vscode.setState({ innerHTML: content }); // Save clean content
+    toggleLineNumbers(lineNumbersCheckbox.checked);
   })
 
   let saveLabelTimer = null
@@ -143,7 +177,11 @@
       serializeBlob(blob, serializedBlob => {
         shoot(serializedBlob)
       })
-    })
+    }).catch(function (error) {
+        console.error('oops, something went wrong!', error);
+        saveBtn.disabled = false;
+        saveBtnText.textContent = 'Save as PNG';
+    });
   }
 
   window.addEventListener('message', e => {
@@ -154,6 +192,7 @@
         const initialHtml = getInitialHtml(fontFamily)
         snippetNode.innerHTML = initialHtml
         vscode.setState({ innerHTML: initialHtml })
+        toggleLineNumbers(lineNumbersCheckbox.checked);
 
         if (bgColor) {
           backgroundColor = bgColor
@@ -164,7 +203,8 @@
       } else if (e.data.type === 'update') {
         document.execCommand('paste')
       } else if (e.data.type === 'restore') {
-        snippetNode.innerHTML = e.data.innerHTML
+        snippetNode.innerHTML = e.data.innerHTML;
+        toggleLineNumbers(lineNumbersCheckbox.checked);
         if (e.data.bgColor) {
           backgroundColor = e.data.bgColor
           bgPicker.value = e.data.bgColor
