@@ -33,6 +33,28 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build extension (tsc)",
+			"type": "shell",
+			"command": "npm run compile",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build extension (tsc)",
+			"type": "shell",
+			"command": "npm run compile",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

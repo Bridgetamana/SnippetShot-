@@ -1,3 +1,9 @@
 .vscode
-demo
+demo/
 *.vsix
+src/
+tsconfig.json
+jsconfig.json
+to-do-list.md
+.gitignore
+**/*.map
