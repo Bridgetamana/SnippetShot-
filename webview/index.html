@@ -32,9 +32,19 @@
         align-items: center;
         color: var(--text);
         background-color: var(--bg);
-        font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-          Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji",
-          "Segoe UI Emoji";
+        font-family:
+          'Inter',
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          Noto Sans,
+          Arial,
+          'Apple Color Emoji',
+          'Segoe UI Emoji';
       }
 
       .toolbar {
@@ -62,8 +72,8 @@
         align-items: center;
       }
       .toolbar select,
-      .toolbar input[type="color"],
-      .toolbar input[type="range"] {
+      .toolbar input[type='color'],
+      .toolbar input[type='range'] {
         background: rgba(30, 41, 59, 0.8);
         color: var(--text);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -71,12 +81,12 @@
         padding: 0.25rem 0.5rem;
         font-size: 12px;
       }
-      .toolbar input[type="color"] {
+      .toolbar input[type='color'] {
         padding: 0.15rem;
         width: 24px;
         height: 24px;
       }
-      .toolbar input[type="checkbox"] {
+      .toolbar input[type='checkbox'] {
         accent-color: var(--accent);
       }
 
@@ -89,9 +99,9 @@
         width: auto;
         min-width: 300px;
         max-width: 90%;
-        height: auto; 
+        height: auto;
         padding: var(--panel-padding);
-        border-radius: 16px; 
+        border-radius: 16px;
         opacity: 0;
         transition: opacity 0.4s ease-in-out;
         background: var(--container-glass);
@@ -140,7 +150,9 @@
         font-size: 14px;
         font-weight: 500;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-        transition: background 0.2s, transform 0.2s;
+        transition:
+          background 0.2s,
+          transform 0.2s;
       }
       .btn:hover {
         background: #2563eb;
@@ -161,9 +173,12 @@
   </head>
 
   <body>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
 
     <div class="toolbar">
       <label>
@@ -176,14 +191,7 @@
       </label>
       <label title="Snippet corner radius">
         Corner radius
-        <input
-          type="range"
-          id="radiusSnippet"
-          min="0"
-          max="32"
-          step="1"
-          value="12"
-        />
+        <input type="range" id="radiusSnippet" min="0" max="32" step="1" value="12" />
       </label>
     </div>
     <div id="snippet-container">
@@ -192,8 +200,16 @@
         style="
           color: #d8dee9;
           background-color: #2e3440;
-          font-family: 'SF Mono', SFMono-Regular, Consolas, 'DejaVu Sans Mono', Ubuntu Mono,
-            'Liberation Mono', Menlo, Courier, monospace;
+          font-family:
+            'SF Mono',
+            SFMono-Regular,
+            Consolas,
+            'DejaVu Sans Mono',
+            Ubuntu Mono,
+            'Liberation Mono',
+            Menlo,
+            Courier,
+            monospace;
           font-weight: normal;
           font-size: 13px;
           line-height: 20px;
@@ -213,16 +229,18 @@
           "
         >
           <div>
-            <span style="font-size: 24px; font-weight: bold; color: #e2e8f0;">Ready to create a SnippetShot?</span>
+            <span style="font-size: 24px; font-weight: bold; color: #e2e8f0"
+              >Ready to create a SnippetShot?</span
+            >
           </div>
-          <div style="margin-top: 16px;">
-            <span style="color: #94a3b8;">1. Copy some code from your editor.</span>
+          <div style="margin-top: 16px">
+            <span style="color: #94a3b8">1. Copy some code from your editor.</span>
           </div>
           <div>
-            <span style="color: #94a3b8;">2. Paste it here.</span>
+            <span style="color: #94a3b8">2. Paste it here.</span>
           </div>
           <div>
-            <span style="color: #94a3b8;">3. Click the 📸 button to save!</span>
+            <span style="color: #94a3b8">3. Click the 📸 button to save!</span>
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
   "name": "snippetshot",
   "displayName": "SnippetShot",
   "description": "Create beautiful code screenshots right inside VS Code.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
@@ -39,7 +39,24 @@
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "vscode:prepublish": "npm run compile",
-    "lint": "echo 'add linter later'"
+    "lint": "eslint src/**/*.ts webview/**/*.js",
+    "lint:fix": "eslint src/**/*.ts webview/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"webview/**/*.js\" \"webview/**/*.html\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"webview/**/*.js\" \"webview/**/*.html\"",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "webview/**/*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "webview/**/*.html": [
+      "prettier --write"
+    ]
   },
   "contributes": {
     "commands": [
@@ -78,6 +95,14 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/vscode": "^1.90.0",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "prettier": "^3.6.2",
     "typescript": "^5.4.0"
   }
 }
