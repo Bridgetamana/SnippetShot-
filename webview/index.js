@@ -12,8 +12,42 @@
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
   const bgPicker = document.getElementById('bgPicker');
-  const radiusSnippet = document.getElementById('radiusSnippet');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
+
+  // Load presets from storage
+  // loadPresets(); // Removed preset functionality
+
+  // Preset management functions - REMOVED
+  // savePresetBtn.addEventListener('click', () => {
+  //   try {
+  //     const presetName = prompt('Enter preset name:');
+  //     if (presetName && presetName.trim()) {
+  //       saveCurrentPreset(presetName.trim());
+  //     }
+  //   } catch (error) {
+  //     console.error('Error saving preset:', error);
+  //     vscode.postMessage({
+  //       type: 'exportError',
+  //       message: 'Failed to save preset. Please try again.',
+  //     });
+  //   }
+  // });
+
+  // presetSelect.addEventListener('change', () => {
+  //   try {
+  //     const presetName = presetSelect.value;
+  //     if (presetName) {
+  //       loadPreset(presetName);
+  //       presetSelect.value = ''; // Reset select
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading preset:', error);
+  //     vscode.postMessage({
+  //       type: 'exportError',
+  //       message: 'Failed to load preset. Please try again.',
+  //     });
+  //   }
+  // });
 
   snippetContainerNode.style.opacity = '1';
   const oldState = vscode.getState();
@@ -27,17 +61,27 @@
   };
 
   const serializeBlob = (blob, cb) => {
+    console.log('Starting blob serialization, blob size:', blob.size);
     const fileReader = new FileReader();
 
     fileReader.onload = () => {
       const bytes = new Uint8Array(fileReader.result);
+      console.log('Blob serialized, byte array length:', bytes.length);
       cb(Array.from(bytes).join(','));
+    };
+
+    fileReader.onerror = () => {
+      console.error('Blob serialization failed');
+      // Reset button state on error
+      saveBtn.disabled = false;
+      saveBtnText.textContent = 'Save as PNG';
     };
 
     fileReader.readAsArrayBuffer(blob);
   };
 
   function shoot(serializedBlob) {
+    console.log('Sending shoot message with blob length:', serializedBlob.length);
     vscode.postMessage({
       type: 'shoot',
       data: {
@@ -65,9 +109,9 @@
     vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } });
   });
 
-  radiusSnippet.addEventListener('input', () => {
-    document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`);
-  });
+  // radiusSnippet.addEventListener('input', () => {
+  //   document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`);
+  // }); // REMOVED corner radius functionality
 
   lineNumbersCheckbox.addEventListener('change', () => {
     toggleLineNumbers(lineNumbersCheckbox.checked);
@@ -147,6 +191,118 @@
     toggleLineNumbers(lineNumbersCheckbox.checked);
   });
 
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    try {
+      // Ctrl+S or Cmd+S to save
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (!saveBtn.disabled) {
+          saveBtn.click();
+        }
+      }
+      // Ctrl+C or Cmd+C to copy (when no text is selected)
+      else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+          e.preventDefault();
+          copyScreenshotToClipboard();
+        }
+      }
+    } catch (error) {
+      console.error('Keyboard shortcut error:', error);
+      vscode.postMessage({
+        type: 'exportError',
+        message: 'Keyboard shortcut failed. Please use the buttons instead.',
+      });
+    }
+  });
+
+  function copyScreenshotToClipboard() {
+    if (saveBtn.disabled) return; // Already processing
+
+    saveBtn.disabled = true;
+    saveBtnText.textContent = 'Copying…';
+
+    // Safety timeout to prevent button from getting stuck
+    const safetyTimeout = setTimeout(() => {
+      if (saveBtn.disabled) {
+        saveBtn.disabled = false;
+        saveBtnText.textContent = 'Save as PNG';
+        vscode.postMessage({
+          type: 'copyError',
+          message: 'Copy operation timed out. Please try again.',
+        });
+      }
+    }, 30000); // 30 second timeout
+
+    const width = snippetContainerNode.offsetWidth * 2;
+    const height = snippetContainerNode.offsetHeight * 2;
+    const config = {
+      width,
+      height,
+      scale: 2,
+      useCORS: true,
+      allowTaint: true, // Allow tainted canvases for better background capture
+      backgroundColor: null, // Don't force background color, let it capture naturally
+      logging: false,
+      ignoreElements: (element) => {
+        // Ignore the toolbar to prevent it from appearing in screenshots
+        return element.classList.contains('toolbar');
+      },
+    };
+
+    html2canvas(snippetContainerNode, config)
+      .then((canvas) => {
+        clearTimeout(safetyTimeout); // Clear safety timeout on success
+        canvas.toBlob((blob) => {
+          if (blob) {
+            navigator.clipboard
+              .write([
+                new ClipboardItem({
+                  'image/png': blob,
+                }),
+              ])
+              .then(() => {
+                saveBtnText.textContent = 'Copied!';
+                setTimeout(() => {
+                  saveBtnText.textContent = 'Save as PNG';
+                }, 2000);
+                vscode.postMessage({
+                  type: 'copySuccess',
+                  message: 'Screenshot copied to clipboard!',
+                });
+              })
+              .catch((error) => {
+                console.error('Clipboard copy failed:', error);
+                saveBtnText.textContent = 'Save as PNG';
+                vscode.postMessage({
+                  type: 'copyError',
+                  message: 'Failed to copy to clipboard. Try saving as file instead.',
+                });
+              })
+              .finally(() => {
+                saveBtn.disabled = false;
+              });
+          } else {
+            throw new Error('Failed to generate image blob');
+          }
+        }, 'image/png');
+      })
+      .catch((error) => {
+        clearTimeout(safetyTimeout); // Clear safety timeout on error
+        console.error('Screenshot copy failed:', error);
+        saveBtn.disabled = false;
+        saveBtnText.textContent = 'Save as PNG';
+        vscode.postMessage({
+          type: 'copyError',
+          message: `Copy failed: ${error.message || 'Unknown error'}`,
+        });
+      });
+  }
+
+  // PRESET FUNCTIONS REMOVED - All preset functionality has been removed
+
   let saveLabelTimer = null;
   saveBtn.addEventListener('click', () => {
     saveBtn.disabled = true;
@@ -155,35 +311,78 @@
   });
 
   function shootAll() {
+    if (saveBtn.disabled) return; // Prevent multiple simultaneous captures
+
+    saveBtn.disabled = true;
+    saveBtnText.textContent = 'Capturing…';
+
+    // Safety timeout to prevent button from getting stuck
+    const safetyTimeout = setTimeout(() => {
+      if (saveBtn.disabled) {
+        saveBtn.disabled = false;
+        saveBtnText.textContent = 'Save as PNG';
+        vscode.postMessage({
+          type: 'exportError',
+          message: 'Screenshot capture timed out. Please try again.',
+        });
+      }
+    }, 30000); // 30 second timeout
+
     const width = snippetContainerNode.offsetWidth * 2;
     const height = snippetContainerNode.offsetHeight * 2;
+    console.log('Starting html2canvas with dimensions:', width, 'x', height);
+
     const config = {
       width,
       height,
-      style: {
-        transform: 'scale(2)',
-        'transform-origin': 'center',
-        background: backgroundColor || '#020617',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true, // Allow tainted canvases for better background capture
+      backgroundColor: null, // Don't force background color, let it capture naturally
+      logging: false,
+      ignoreElements: (element) => {
+        // Ignore the toolbar to prevent it from appearing in screenshots
+        return element.classList.contains('toolbar');
       },
     };
 
-    // Hide resizer before capture
-    snippetNode.style.resize = 'none';
-    snippetContainerNode.style.resize = 'none';
+    // Add loading state
+    snippetContainerNode.style.opacity = '0.7';
+    console.log('Calling html2canvas...');
 
-    domtoimage
-      .toBlob(snippetContainerNode, config)
-      .then((blob) => {
-        snippetNode.style.resize = '';
-        snippetContainerNode.style.resize = '';
-        serializeBlob(blob, (serializedBlob) => {
-          shoot(serializedBlob);
-        });
+    html2canvas(snippetContainerNode, config)
+      .then((canvas) => {
+        console.log('html2canvas promise resolved');
+        clearTimeout(safetyTimeout); // Clear safety timeout on success
+        snippetContainerNode.style.opacity = '1';
+        console.log('Converting canvas to blob...');
+        canvas.toBlob((blob) => {
+          console.log('Canvas to blob callback executed');
+          if (blob) {
+            console.log('Blob created successfully, size:', blob.size);
+            serializeBlob(blob, (serializedBlob) => {
+              console.log('Blob serialized, calling shoot function');
+              shoot(serializedBlob);
+            });
+          } else {
+            console.error('Canvas to blob failed - no blob created');
+            throw new Error('Failed to generate image blob');
+          }
+        }, 'image/png');
       })
-      .catch(function (error) {
-        console.error('oops, something went wrong!', error);
+      .catch((error) => {
+        clearTimeout(safetyTimeout); // Clear safety timeout on error
+        console.error('Screenshot capture failed:', error);
+        snippetContainerNode.style.opacity = '1';
         saveBtn.disabled = false;
         saveBtnText.textContent = 'Save as PNG';
+
+        // Show user-friendly error message
+        const errorMessage = error.message || 'Unknown error occurred';
+        vscode.postMessage({
+          type: 'exportError',
+          message: `Screenshot capture failed: ${errorMessage}. Please try again.`,
+        });
       });
   }
 
@@ -226,6 +425,7 @@
           snippetNode.style.fontVariantLigatures = 'none';
         }
       } else if (e.data.type === 'saveSuccess') {
+        console.log('Received saveSuccess message');
         saveBtnText.textContent = 'Saved!';
         saveBtn.disabled = false;
         if (saveLabelTimer) {
@@ -235,6 +435,7 @@
           saveBtnText.textContent = 'Save as PNG';
         }, 2000);
       } else if (e.data.type === 'saveError') {
+        console.log('Received saveError message:', e.data.message);
         saveBtnText.textContent = 'Save as PNG';
         saveBtn.disabled = false;
       }

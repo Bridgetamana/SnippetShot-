@@ -5,8 +5,8 @@ import { homedir } from 'os';
 
 const P_TITLE = 'SnippetShot';
 
-function writeSerializedBlobToFile(serializeBlob: string, fileName: string) {
-  const bytes = new Uint8Array(serializeBlob.split(',').map((n) => Number(n)));
+function writeSerializedBlobToFile(serializedBlob: string, fileName: string) {
+  const bytes = new Uint8Array(serializedBlob.split(',').map((n) => Number(n)));
   fs.writeFileSync(fileName, Buffer.from(bytes));
 }
 
@@ -88,6 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
     p.webview.onDidReceiveMessage(({ type, data }) => {
       switch (type) {
         case 'shoot': {
+          console.log('Extension received shoot message');
           const now = new Date();
           const pad = (n: number) => n.toString().padStart(2, '0');
           const yyyy = now.getFullYear();
@@ -98,11 +99,14 @@ export function activate(context: vscode.ExtensionContext) {
           const ss = pad(now.getSeconds());
           const filename = `codesnippet-${yyyy}${mm}${dd}-${hh}${mi}${ss}.png`;
           const filePath = path.resolve(downloadsDir, filename);
+          console.log('Attempting to save to:', filePath);
           try {
             writeSerializedBlobToFile(data.serializedBlob, filePath);
+            console.log('File saved successfully');
             p.webview.postMessage({ type: 'saveSuccess', fileName: filename, filePath });
             vscode.window.showInformationMessage(`Saved to Downloads: ${filename}`);
           } catch (err) {
+            console.error('Save failed:', err);
             p.webview.postMessage({
               type: 'saveError',
               message: (err as Error)?.message || String(err),
@@ -127,11 +131,22 @@ export function activate(context: vscode.ExtensionContext) {
         case 'updateBgColor':
           context.globalState.update('snippetshot.bgColor', data.bgColor);
           break;
-        case 'invalidPasteContent':
-          vscode.window.showInformationMessage(
-            'Pasted content is invalid. Only copy from VS Code and check if your shortcuts for copy/paste have conflicts.'
-          );
+        case 'copySuccess':
+          vscode.window.showInformationMessage(data.message || 'Screenshot copied to clipboard!');
           break;
+        case 'copyError':
+          vscode.window.showErrorMessage(data.message || 'Failed to copy screenshot to clipboard');
+          break;
+        case 'exportError':
+          vscode.window.showErrorMessage(data.message || 'Screenshot export failed');
+          break;
+        // PRESET FUNCTIONALITY REMOVED
+        // case 'presetSaved':
+        //   vscode.window.showInformationMessage(data.message || 'Preset saved successfully!');
+        //   break;
+        // case 'presetLoaded':
+        //   vscode.window.showInformationMessage(data.message || 'Preset loaded successfully!');
+        //   break;
       }
     });
   }

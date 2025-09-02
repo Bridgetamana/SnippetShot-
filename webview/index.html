@@ -7,7 +7,6 @@
     <style>
       :root {
         --panel-padding: 24px;
-        --snippet-radius: 8px;
         --shadow-snippet: rgba(0, 0, 0, 0.25) 0 8px 24px;
         --bg: #020617;
         --container-glass: rgba(255, 255, 255, 0.05);
@@ -45,6 +44,8 @@
           Arial,
           'Apple Color Emoji',
           'Segoe UI Emoji';
+        min-height: 100vh;
+        background-attachment: fixed; /* Ensure background stays fixed for screenshots */
       }
 
       .toolbar {
@@ -63,6 +64,40 @@
         border: 1px solid var(--border);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         z-index: 10;
+        max-width: calc(100vw - 2rem);
+        overflow-x: auto;
+      }
+
+      /* Responsive toolbar for smaller screens */
+      @media (max-width: 768px) {
+        .toolbar {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          top: 8px;
+          left: 8px;
+          right: 8px;
+          transform: none;
+          width: auto;
+          max-width: none;
+        }
+        .toolbar label {
+          font-size: 12px;
+          white-space: nowrap;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .toolbar {
+          position: static;
+          margin-bottom: 1rem;
+          transform: none;
+          left: auto;
+          top: auto;
+        }
+        body {
+          padding-top: 1rem;
+        }
       }
       .toolbar label {
         font-size: 13px;
@@ -95,7 +130,7 @@
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        resize: both;
+        resize: horizontal; /* Only allow horizontal resizing */
         width: auto;
         min-width: 300px;
         max-width: 90%;
@@ -189,10 +224,6 @@
         Line numbers
         <input type="checkbox" id="lineNumbers" checked />
       </label>
-      <label title="Snippet corner radius">
-        Corner radius
-        <input type="range" id="radiusSnippet" min="0" max="32" step="1" value="12" />
-      </label>
     </div>
     <div id="snippet-container">
       <div
@@ -266,7 +297,7 @@
       </button>
     </div>
 
-    <script src="./dom2image.js"></script>
+    <script src="./html2canvas.min.js"></script>
     <script src="./vivus.js"></script>
     <script src="./index.js"></script>
   </body>

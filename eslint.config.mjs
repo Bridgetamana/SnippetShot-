@@ -45,8 +45,12 @@ export default [
         DOMParser: 'readonly',
         FileReader: 'readonly',
         Uint8Array: 'readonly',
+        navigator: 'readonly',
+        ClipboardItem: 'readonly',
+        localStorage: 'readonly',
+        prompt: 'readonly',
         acquireVsCodeApi: 'readonly',
-        domtoimage: 'readonly',
+        html2canvas: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly'
       }
@@ -61,6 +65,6 @@ export default [
     }
   },
   {
-    ignores: ['out/', 'node_modules/', '*.min.js', 'webview/dom2image.js', 'webview/vivus.js']
+    ignores: ['out/', 'node_modules/', '*.min.js', 'webview/dom2image.js', 'webview/vivus.js', 'webview/html2canvas.min.js']
   }
 ];
