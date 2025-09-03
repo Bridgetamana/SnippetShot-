@@ -87,7 +87,6 @@ function activate(context) {
             const filePath = path.join(downloadsDir, `${fileBase}.png`)
             writeSerializedBlobToFile(data.serializedBlob, filePath)
             lastUsedImageUri = vscode.Uri.file(filePath)
-            // Notify webview of success so it can update the UI label
             panel.webview.postMessage({ type: 'saveSuccess', fileName: path.basename(filePath), filePath })
             vscode.window.showInformationMessage(`Saved to Downloads: ${path.basename(filePath)}`, 'Open Folder').then(sel => {
               if (sel === 'Open Folder') {
@@ -95,7 +94,6 @@ function activate(context) {
               }
             })
           } catch (err) {
-            // Notify webview of failure too
             panel.webview.postMessage({ type: 'saveError', message: err?.message || String(err) })
             vscode.window.showErrorMessage(`Save failed: ${err?.message || err}`)
           }
@@ -121,9 +119,7 @@ function activate(context) {
           }
           break
         case 'invalidPasteContent':
-          vscode.window.showInformationMessage(
-            'Pasted content is invalid. Only copy from VS Code and check if your shortcuts for copy/paste have conflicts.'
-          )
+          vscode.window.showInformationMessage('Pasted content is invalid. Only copy from VS Code and check if your shortcuts for copy/paste have conflicts.')
           break
       }
     })
@@ -146,9 +142,7 @@ function activate(context) {
     return vscode.window.onDidChangeTextEditorSelection(e => {
       if (e.selections[0] && !e.selections[0].isEmpty) {
         vscode.commands.executeCommand('editor.action.clipboardCopyWithSyntaxHighlightingAction')
-        panel.webview.postMessage({
-          type: 'update'
-        })
+  panel.webview.postMessage({ type: 'update' })
       }
     })
   }

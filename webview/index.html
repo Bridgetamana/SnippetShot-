@@ -4,213 +4,15 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; img-src https: data: vscode-webview-resource:; script-src vscode-webview-resource:; style-src 'unsafe-inline' vscode-webview-resource:;"
     />
-    <style>
-      :root {
-        --panel-padding: 16px;
-        --shadow-snippet: rgba(0, 0, 0, 0.25) 0 8px 24px;
-        --bg: #020617;
-        --container-glass: rgba(255, 255, 255, 0.05);
-        --border: rgba(255, 255, 255, 0.1);
-        --text: #e2e8f0;
-        --muted: #94a3b8;
-        --accent: #38bdf8;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: var(--text);
-        background-color: var(--bg);
-        font-family:
-          'Inter',
-          ui-sans-serif,
-          system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          Ubuntu,
-          Cantarell,
-          Noto Sans,
-          Arial,
-          'Apple Color Emoji',
-          'Segoe UI Emoji';
-        min-height: 100vh;
-        background-attachment: fixed;
-      }
-
-      .toolbar {
-        position: fixed;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 0.75rem;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.7);
-        -webkit-backdrop-filter: blur(10px) saturate(140%);
-        backdrop-filter: blur(10px) saturate(140%);
-        border: 1px solid var(--border);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        z-index: 10;
-        max-width: calc(100vw - 2rem);
-        overflow-x: auto;
-      }
-
-      /* Responsive toolbar for smaller screens */
-      @media (max-width: 768px) {
-        .toolbar {
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          top: 8px;
-          left: 8px;
-          right: 8px;
-          transform: none;
-          width: auto;
-          max-width: none;
-        }
-        .toolbar label {
-          font-size: 12px;
-          white-space: nowrap;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .toolbar {
-          position: static;
-          margin-bottom: 1rem;
-          transform: none;
-          left: auto;
-          top: auto;
-        }
-        body {
-          padding-top: 1rem;
-        }
-      }
-      .toolbar label {
-        font-size: 13px;
-        color: var(--muted);
-        display: inline-flex;
-        gap: 0.5rem;
-        align-items: center;
-      }
-      .toolbar select,
-      .toolbar input[type='color'],
-      .toolbar input[type='range'] {
-        background: rgba(30, 41, 59, 0.8);
-        color: var(--text);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 0.25rem 0.5rem;
-        font-size: 12px;
-      }
-      .toolbar input[type='color'] {
-        padding: 0.15rem;
-        width: 24px;
-        height: 24px;
-      }
-      .toolbar input[type='checkbox'] {
-        accent-color: var(--accent);
-      }
-
-      #snippet-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        overflow: hidden;
-        resize: horizontal;
-        width: auto;
-        min-width: 300px;
-        max-width: 90%;
-        height: auto;
-        opacity: 0;
-        transition: opacity 0.4s ease-in-out;
-      }
-      #snippet {
-        overflow: auto;
-        resize: none;
-        display: flex;
-        padding: 24px;
-        margin: 0;
-        width: 100%;
-        border-radius: var(--snippet-radius);
-        box-shadow: var(--shadow-snippet);
-      }
-      #snippet > div {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        white-space: pre-wrap;
-        word-break: break-all;
-        text-align: center;
-      }
-      #snippet > div > div {
-        display: inline-block;
-        text-align: left;
-      }
-
-      #save-container {
-        margin-top: 24px;
-        margin-bottom: 24px;
-        text-align: center;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-        padding: 0.7rem 1.2rem;
-        border-radius: 12px;
-        color: var(--text);
-        background: #1e40af;
-        border: none;
-        cursor: pointer;
-        user-select: none;
-        font-size: 14px;
-        font-weight: 500;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-        transition:
-          background 0.2s,
-          transform 0.2s;
-      }
-      .btn:hover {
-        background: #2563eb;
-        transform: translateY(-2px);
-      }
-      .btn:active {
-        transform: translateY(0);
-      }
-      .btn svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .obturateur {
-        display: none !important;
-      }
-    </style>
-  </head>
-
-  <body>
+    <link href="./styles.css" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-
+  </head>
+  <body>
     <div class="toolbar">
       <label>
         Background
@@ -221,50 +23,16 @@
         <input type="checkbox" id="lineNumbers" checked />
       </label>
     </div>
-    <div id="snippet-container">
-      <div
-        id="snippet"
-        style="
-          color: #d8dee9;
-          background-color: #2e3440;
-          font-family:
-            'SF Mono',
-            SFMono-Regular,
-            Consolas,
-            'DejaVu Sans Mono',
-            Ubuntu Mono,
-            'Liberation Mono',
-            Menlo,
-            Courier,
-            monospace;
-          font-weight: normal;
-          font-size: 13px;
-        "
-      >
+    <div class="snippet-container">
+      <div id="snippet">
         <meta charset="utf-8" />
-        <div
-          style="
-            color: #d8dee9;
-            background-color: #2e3440;
-            font-family: 'Inter', sans-serif;
-            font-weight: normal;
-            font-size: 14px;
-          "
-        >
-          <div style="border: 1px solid red">
-            <span style="font-size: 24px; font-weight: bold; color: #e2e8f0"
-              >Ready to create a SnippetShot?</span
-            >
+        <div class="snippet-initial">
+          <div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div>
+          <div class="snippet-initial-step snippet-initial-step--first">
+            <span class="snippet-initial-step">1. Copy some code from your editor.</span>
           </div>
-          <div style="margin-top: 16px">
-            <span style="color: #94a3b8">1. Copy some code from your editor.</span>
-          </div>
-          <div>
-            <span style="color: #94a3b8">2. Paste it here.</span>
-          </div>
-          <div>
-            <span style="color: #94a3b8">3. Click the 📸 button to save!</span>
-          </div>
+          <div><span class="snippet-initial-step">2. Paste it here.</span></div>
+          <div><span class="snippet-initial-step">3. Click the 📸 button to save!</span></div>
         </div>
       </div>
     </div>

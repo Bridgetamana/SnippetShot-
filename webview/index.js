@@ -1,79 +1,32 @@
 /* global domtoimage */
 (function () {
   const vscode = acquireVsCodeApi();
-
   let backgroundColor = '#020617';
-
-  vscode.postMessage({
-    type: 'getAndUpdateCacheAndSettings',
-  });
-
+  vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
   const snippetNode = document.getElementById('snippet');
-  const snippetContainerNode = document.getElementById('snippet-container');
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
   const bgPicker = document.getElementById('bgPicker');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
 
-  // Load presets from storage
-  // loadPresets(); // Removed preset functionality
-
-  // Preset management functions - REMOVED
-  // savePresetBtn.addEventListener('click', () => {
-  //   try {
-  //     const presetName = prompt('Enter preset name:');
-  //     if (presetName && presetName.trim()) {
-  //       saveCurrentPreset(presetName.trim());
-  //     }
-  //   } catch (error) {
-  //     console.error('Error saving preset:', error);
-  //     vscode.postMessage({
-  //       type: 'exportError',
-  //       message: 'Failed to save preset. Please try again.',
-  //     });
-  //   }
-  // });
-
-  // presetSelect.addEventListener('change', () => {
-  //   try {
-  //     const presetName = presetSelect.value;
-  //     if (presetName) {
-  //       loadPreset(presetName);
-  //       presetSelect.value = ''; // Reset select
-  //     }
-  //   } catch (error) {
-  //     console.error('Error loading preset:', error);
-  //     vscode.postMessage({
-  //       type: 'exportError',
-  //       message: 'Failed to load preset. Please try again.',
-  //     });
-  //   }
-  // });
-
-  snippetContainerNode.style.opacity = '1';
   const oldState = vscode.getState();
   if (oldState && oldState.innerHTML) {
     snippetNode.innerHTML = oldState.innerHTML;
   }
 
-  const getInitialHtml = (fontFamily) => {
-    const monoFontStack = `'SF Mono', ${fontFamily}, SFMono-Regular, Consolas, 'DejaVu Sans Mono', Ubuntu Mono, 'Liberation Mono', Menlo, Courier, monospace`;
-    return `<meta charset="utf-8"><div style="color: #d8dee9;background-color: #2e3440; font-family: ${monoFontStack};font-weight: normal;font-size: 13px;line-height: 20px;white-space: pre; text-align: left;"><div><span style="font-family: 'Inter', sans-serif; font-size: 22px; font-weight: bold; color: #e2e8f0;">Ready to create a SnippetShot?</span></div><div style="margin-top: 16px; font-family: 'Inter', sans-serif; color: #94a3b8;"><span>1. Copy some code from your editor.</span></div><div style="font-family: 'Inter', sans-serif; color: #94a3b8;"><span>2. Paste it here.</span></div><div style="font-family: 'Inter', sans-serif; color: #94a3b8;"><span>3. Click the 📸 button to save!</span></div></div>`;
+  const getInitialHtml = (_fontFamily) => {
+    return `<meta charset="utf-8"><div class="snippet-initial"><div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div><div class="snippet-initial-step snippet-initial-step--first"><span class="snippet-initial-step">1. Copy some code from your editor.</span></div><div><span class="snippet-initial-step">2. Paste it here.</span></div><div><span class="snippet-initial-step">3. Click the 📸 button to save!</span></div></div>`;
   };
 
   const serializeBlob = (blob, cb) => {
-    console.log('Starting blob serialization, blob size:', blob.size);
     const fileReader = new FileReader();
 
     fileReader.onload = () => {
       const bytes = new Uint8Array(fileReader.result);
-      console.log('Blob serialized, byte array length:', bytes.length);
       cb(Array.from(bytes).join(','));
     };
 
     fileReader.onerror = () => {
-      console.error('Blob serialization failed');
-      // Reset button state on error
       saveBtn.disabled = false;
       saveBtnText.textContent = 'Save as PNG';
     };
@@ -81,54 +34,48 @@
     fileReader.readAsArrayBuffer(blob);
   };
 
-  // Apply clean, symmetric export styles and return a restore function
   function applyExportStyles() {
-    // backup container styles
-    const containerBackup = {
-      background: snippetContainerNode.style.background,
-      border: snippetContainerNode.style.border,
-      padding: snippetContainerNode.style.padding,
-      maxWidth: snippetContainerNode.style.maxWidth,
-      width: snippetContainerNode.style.width,
-      height: snippetContainerNode.style.height,
-      display: snippetContainerNode.style.display,
-      textAlign: snippetContainerNode.style.textAlign,
-      opacity: snippetContainerNode.style.opacity,
-    };
-    // backup snippet styles
     const snippetBackup = {
       width: snippetNode.style.width,
       display: snippetNode.style.display,
       margin: snippetNode.style.margin,
       backgroundColor: snippetNode.style.backgroundColor,
+      padding: snippetNode.style.padding,
     };
-
-    // Solid background, no glass/border, even padding, shrink-to-fit
-    snippetContainerNode.style.background = backgroundColor;
-    snippetContainerNode.style.border = 'none';
-    snippetContainerNode.style.padding = '64px 48px';
-    snippetContainerNode.style.maxWidth = 'none';
-    snippetContainerNode.style.width = 'fit-content';
-    snippetContainerNode.style.height = 'fit-content';
-    snippetContainerNode.style.display = 'block';
-    snippetContainerNode.style.textAlign = 'center';
-
-    // Make snippet shrink to content and center within container
+    const wrapper = document.createElement('div');
+    wrapper.style.background = backgroundColor;
+    wrapper.style.border = 'none';
+    wrapper.style.padding = '64px 48px';
+    wrapper.style.maxWidth = 'none';
+    wrapper.style.width = 'fit-content';
+    wrapper.style.height = 'fit-content';
+    wrapper.style.display = 'block';
+    wrapper.style.textAlign = 'center';
     snippetNode.style.width = 'auto';
     snippetNode.style.height = 'auto';
     snippetNode.style.display = 'inline-block';
     snippetNode.style.margin = '0';
+    const parent = snippetNode.parentElement;
+    const nextSibling = snippetNode.nextSibling;
+    if (parent) {
+      parent.insertBefore(wrapper, snippetNode);
+      wrapper.appendChild(snippetNode);
+    } else {
+      document.body.appendChild(wrapper);
+      wrapper.appendChild(snippetNode);
+    }
 
     return function restore() {
-      snippetContainerNode.style.background = containerBackup.background;
-      snippetContainerNode.style.border = containerBackup.border;
-      snippetContainerNode.style.padding = containerBackup.padding;
-      snippetContainerNode.style.maxWidth = containerBackup.maxWidth;
-      snippetContainerNode.style.width = containerBackup.width;
-      snippetContainerNode.style.height = containerBackup.height;
-      snippetContainerNode.style.display = containerBackup.display;
-      snippetContainerNode.style.textAlign = containerBackup.textAlign;
-      snippetContainerNode.style.opacity = containerBackup.opacity;
+      if (parent) {
+        if (nextSibling) {
+          parent.insertBefore(snippetNode, nextSibling);
+        } else {
+          parent.appendChild(snippetNode);
+        }
+      } else {
+        document.body.appendChild(snippetNode);
+      }
+      wrapper.remove();
 
       snippetNode.style.width = snippetBackup.width;
       snippetNode.style.display = snippetBackup.display;
@@ -139,7 +86,6 @@
   }
 
   function shoot(serializedBlob) {
-    console.log('Sending shoot message with blob length:', serializedBlob.length);
     vscode.postMessage({
       type: 'shoot',
       data: {
@@ -154,13 +100,11 @@
   }
 
   function updateEnvironment(snippetBgColor) {
-    // update snippet bg color
     if (snippetBgColor) {
       document.getElementById('snippet').style.backgroundColor = snippetBgColor;
     }
   }
 
-  // UI bindings
   bgPicker.addEventListener('input', () => {
     backgroundColor = bgPicker.value;
     document.body.style.backgroundColor = backgroundColor;
@@ -176,7 +120,6 @@
     const lineContainer = snippet.querySelector('div');
     if (!lineContainer) return;
 
-    // Always remove existing line numbers to prevent duplicates
     const existingNumbers = snippet.querySelectorAll('.line-number');
     existingNumbers.forEach((n) => n.remove());
     const allLinesForStyleReset = Array.from(snippet.querySelectorAll('div > div'));
@@ -245,26 +188,21 @@
     toggleLineNumbers(lineNumbersCheckbox.checked);
   });
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     try {
-      // Ctrl+S or Cmd+S to save
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         if (!saveBtn.disabled) {
           saveBtn.click();
         }
-      }
-      // Ctrl+C or Cmd+C to copy (when no text is selected)
-      else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+      } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
           e.preventDefault();
           copyScreenshotToClipboard();
         }
       }
-    } catch (error) {
-      console.error('Keyboard shortcut error:', error);
+    } catch {
       vscode.postMessage({
         type: 'exportError',
         message: 'Keyboard shortcut failed. Please use the buttons instead.',
@@ -273,12 +211,11 @@
   });
 
   function copyScreenshotToClipboard() {
-    if (saveBtn.disabled) return; // Already processing
+    if (saveBtn.disabled) return;
 
     saveBtn.disabled = true;
     saveBtnText.textContent = 'Copying…';
 
-    // Safety timeout to prevent button from getting stuck
     const safetyTimeout = setTimeout(() => {
       if (saveBtn.disabled) {
         saveBtn.disabled = false;
@@ -288,7 +225,7 @@
           message: 'Copy operation timed out. Please try again.',
         });
       }
-    }, 30000); // 30 second timeout
+    }, 30000);
 
     const restore = applyExportStyles();
     const config = {
@@ -299,9 +236,9 @@
     };
 
     domtoimage
-      .toBlob(snippetContainerNode, config)
+      .toBlob(document.querySelector('#snippet').parentElement, config)
       .then((blob) => {
-        clearTimeout(safetyTimeout); // Clear safety timeout on success
+        clearTimeout(safetyTimeout);
         if (blob) {
           navigator.clipboard
             .write([
@@ -319,8 +256,7 @@
                 message: 'Screenshot copied to clipboard!',
               });
             })
-            .catch((error) => {
-              console.error('Clipboard copy failed:', error);
+            .catch((_error) => {
               saveBtnText.textContent = 'Save as PNG';
               vscode.postMessage({
                 type: 'copyError',
@@ -336,8 +272,7 @@
         }
       })
       .catch((error) => {
-        clearTimeout(safetyTimeout); // Clear safety timeout on error
-        console.error('Screenshot copy failed:', error);
+        clearTimeout(safetyTimeout);
         restore();
         saveBtn.disabled = false;
         saveBtnText.textContent = 'Save as PNG';
@@ -348,21 +283,17 @@
       });
   }
 
-  // PRESET FUNCTIONS REMOVED - All preset functionality has been removed
-
   let saveLabelTimer = null;
   saveBtn.addEventListener('click', () => {
-    // Delegate disabling and label updates to shootAll() so shootAll can manage saveBtn state.
     shootAll();
   });
 
   function shootAll() {
-    if (saveBtn.disabled) return; // Prevent multiple simultaneous captures
+    if (saveBtn.disabled) return;
 
     saveBtn.disabled = true;
     saveBtnText.textContent = 'Capturing…';
 
-    // Safety timeout to prevent button from getting stuck
     const safetyTimeout = setTimeout(() => {
       if (saveBtn.disabled) {
         saveBtn.disabled = false;
@@ -372,7 +303,7 @@
           message: 'Screenshot capture timed out. Please try again.',
         });
       }
-    }, 30000); // 30 second timeout
+    }, 30000);
 
     const restore = applyExportStyles();
     const config = {
@@ -382,36 +313,28 @@
       },
     };
 
-    // Add loading state
-    snippetContainerNode.style.opacity = '0.7';
-    console.log('Calling domtoimage...');
+    const target = document.querySelector('#snippet').parentElement;
+    if (target && target.style) target.style.opacity = '0.7';
 
     domtoimage
-      .toBlob(snippetContainerNode, config)
+      .toBlob(target, config)
       .then((blob) => {
-        console.log('domtoimage promise resolved');
-        clearTimeout(safetyTimeout); // Clear safety timeout on success
-        snippetContainerNode.style.opacity = '1';
-        console.log('Converting blob...');
+        clearTimeout(safetyTimeout);
+        if (target && target.style) target.style.opacity = '1';
         if (blob) {
-          console.log('Blob created successfully, size:', blob.size);
           serializeBlob(blob, (serializedBlob) => {
-            console.log('Blob serialized, calling shoot function');
             shoot(serializedBlob);
           });
         } else {
-          console.error('domtoimage failed - no blob created');
           throw new Error('Failed to generate image blob');
         }
       })
       .catch((error) => {
-        clearTimeout(safetyTimeout); // Clear safety timeout on error
-        console.error('Screenshot capture failed:', error);
-        snippetContainerNode.style.opacity = '1';
+        clearTimeout(safetyTimeout);
+        if (target && target.style) target.style.opacity = '1';
         saveBtn.disabled = false;
         saveBtnText.textContent = 'Save as PNG';
 
-        // Show user-friendly error message
         const errorMessage = error.message || 'Unknown error occurred';
         vscode.postMessage({
           type: 'exportError',
@@ -462,7 +385,6 @@
           snippetNode.style.fontVariantLigatures = 'none';
         }
       } else if (e.data.type === 'saveSuccess') {
-        console.log('Received saveSuccess message');
         saveBtnText.textContent = 'Saved!';
         saveBtn.disabled = false;
         if (saveLabelTimer) {
@@ -472,7 +394,6 @@
           saveBtnText.textContent = 'Save as PNG';
         }, 2000);
       } else if (e.data.type === 'saveError') {
-        console.log('Received saveError message:', e.data.message);
         saveBtnText.textContent = 'Save as PNG';
         saveBtn.disabled = false;
       }

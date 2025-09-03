@@ -18,9 +18,8 @@ export function activate(context: vscode.ExtensionContext) {
     const candidate = path.resolve(home, 'Downloads');
     try {
       if (fs.existsSync(candidate)) return candidate;
-    } catch (error) {
-      // Ignore errors when checking if directory exists
-      console.warn('Error checking downloads directory:', error);
+    } catch {
+      /* ignore */
     }
     return home;
   })();
@@ -88,7 +87,6 @@ export function activate(context: vscode.ExtensionContext) {
     p.webview.onDidReceiveMessage(({ type, data }) => {
       switch (type) {
         case 'shoot': {
-          console.log('Extension received shoot message');
           const now = new Date();
           const pad = (n: number) => n.toString().padStart(2, '0');
           const yyyy = now.getFullYear();
@@ -99,14 +97,11 @@ export function activate(context: vscode.ExtensionContext) {
           const ss = pad(now.getSeconds());
           const filename = `codesnippet-${yyyy}${mm}${dd}-${hh}${mi}${ss}.png`;
           const filePath = path.resolve(downloadsDir, filename);
-          console.log('Attempting to save to:', filePath);
           try {
             writeSerializedBlobToFile(data.serializedBlob, filePath);
-            console.log('File saved successfully');
             p.webview.postMessage({ type: 'saveSuccess', fileName: filename, filePath });
             vscode.window.showInformationMessage(`Saved to Downloads: ${filename}`);
           } catch (err) {
-            console.error('Save failed:', err);
             p.webview.postMessage({
               type: 'saveError',
               message: (err as Error)?.message || String(err),
@@ -116,7 +111,6 @@ export function activate(context: vscode.ExtensionContext) {
           break;
         }
         case 'updateSettingsFromWebview':
-          // Non-persistent except bgColor below; reflect new settings immediately
           if (panel) {
             syncSettings(panel);
           }
@@ -140,13 +134,6 @@ export function activate(context: vscode.ExtensionContext) {
         case 'exportError':
           vscode.window.showErrorMessage(data.message || 'Screenshot export failed');
           break;
-        // PRESET FUNCTIONALITY REMOVED
-        // case 'presetSaved':
-        //   vscode.window.showInformationMessage(data.message || 'Preset saved successfully!');
-        //   break;
-        // case 'presetLoaded':
-        //   vscode.window.showInformationMessage(data.message || 'Preset loaded successfully!');
-        //   break;
       }
     });
   }
@@ -180,7 +167,6 @@ function getHtmlContent(htmlPath: string, webview: vscode.Webview) {
 
 export function deactivate() {}
 
-// Keep selection in sync with the webview so it can copy with highlighting
 function setupSelectionSync(panel: vscode.WebviewPanel) {
   return vscode.window.onDidChangeTextEditorSelection((e) => {
     if (e.selections[0] && !e.selections[0].isEmpty) {
