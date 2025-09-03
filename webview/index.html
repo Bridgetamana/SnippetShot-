@@ -6,7 +6,7 @@
     />
     <style>
       :root {
-        --panel-padding: 24px;
+        --panel-padding: 16px;
         --shadow-snippet: rgba(0, 0, 0, 0.25) 0 8px 24px;
         --bg: #020617;
         --container-glass: rgba(255, 255, 255, 0.05);
@@ -45,7 +45,7 @@
           'Apple Color Emoji',
           'Segoe UI Emoji';
         min-height: 100vh;
-        background-attachment: fixed; /* Ensure background stays fixed for screenshots */
+        background-attachment: fixed;
       }
 
       .toolbar {
@@ -125,12 +125,12 @@
         accent-color: var(--accent);
       }
 
-      #snippet-container {
+      /* #snippet-container {
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        resize: horizontal; /* Only allow horizontal resizing */
+        resize: horizontal;
         width: auto;
         min-width: 300px;
         max-width: 90%;
@@ -141,10 +141,10 @@
         transition: opacity 0.4s ease-in-out;
         background: var(--container-glass);
         border: 1px solid var(--border);
-      }
+      } */
       #snippet {
         overflow: auto;
-        resize: none; /* Resizing the outer container is enough */
+        resize: none;
         display: flex;
         padding: 24px;
         margin: 0;
@@ -202,7 +202,7 @@
       }
 
       .obturateur {
-        display: none !important; /* Hiding the complex SVG animation for a cleaner look */
+        display: none !important;
       }
     </style>
   </head>
@@ -243,8 +243,6 @@
             monospace;
           font-weight: normal;
           font-size: 13px;
-          line-height: 20px;
-          white-space: pre;
         "
       >
         <meta charset="utf-8" />
@@ -255,11 +253,9 @@
             font-family: 'Inter', sans-serif;
             font-weight: normal;
             font-size: 14px;
-            line-height: 22px;
-            white-space: pre-wrap;
           "
         >
-          <div>
+          <div style="border: 1px solid red">
             <span style="font-size: 24px; font-weight: bold; color: #e2e8f0"
               >Ready to create a SnippetShot?</span
             >
@@ -297,7 +293,7 @@
       </button>
     </div>
 
-    <script src="./html2canvas.min.js"></script>
+    <script src="./dom2image.js"></script>
     <script src="./vivus.js"></script>
     <script src="./index.js"></script>
   </body>

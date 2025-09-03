@@ -1,3 +1,4 @@
+/* global domtoimage */
 (function () {
   const vscode = acquireVsCodeApi();
 
@@ -80,6 +81,63 @@
     fileReader.readAsArrayBuffer(blob);
   };
 
+  // Apply clean, symmetric export styles and return a restore function
+  function applyExportStyles() {
+    // backup container styles
+    const containerBackup = {
+      background: snippetContainerNode.style.background,
+      border: snippetContainerNode.style.border,
+      padding: snippetContainerNode.style.padding,
+      maxWidth: snippetContainerNode.style.maxWidth,
+      width: snippetContainerNode.style.width,
+      height: snippetContainerNode.style.height,
+      display: snippetContainerNode.style.display,
+      textAlign: snippetContainerNode.style.textAlign,
+      opacity: snippetContainerNode.style.opacity,
+    };
+    // backup snippet styles
+    const snippetBackup = {
+      width: snippetNode.style.width,
+      display: snippetNode.style.display,
+      margin: snippetNode.style.margin,
+      backgroundColor: snippetNode.style.backgroundColor,
+    };
+
+    // Solid background, no glass/border, even padding, shrink-to-fit
+    snippetContainerNode.style.background = backgroundColor;
+    snippetContainerNode.style.border = 'none';
+    snippetContainerNode.style.padding = '64px 48px';
+    snippetContainerNode.style.maxWidth = 'none';
+    snippetContainerNode.style.width = 'fit-content';
+    snippetContainerNode.style.height = 'fit-content';
+    snippetContainerNode.style.display = 'block';
+    snippetContainerNode.style.textAlign = 'center';
+
+    // Make snippet shrink to content and center within container
+    snippetNode.style.width = 'auto';
+    snippetNode.style.height = 'auto';
+    snippetNode.style.display = 'inline-block';
+    snippetNode.style.margin = '0';
+
+    return function restore() {
+      snippetContainerNode.style.background = containerBackup.background;
+      snippetContainerNode.style.border = containerBackup.border;
+      snippetContainerNode.style.padding = containerBackup.padding;
+      snippetContainerNode.style.maxWidth = containerBackup.maxWidth;
+      snippetContainerNode.style.width = containerBackup.width;
+      snippetContainerNode.style.height = containerBackup.height;
+      snippetContainerNode.style.display = containerBackup.display;
+      snippetContainerNode.style.textAlign = containerBackup.textAlign;
+      snippetContainerNode.style.opacity = containerBackup.opacity;
+
+      snippetNode.style.width = snippetBackup.width;
+      snippetNode.style.display = snippetBackup.display;
+      snippetNode.style.margin = snippetBackup.margin;
+      snippetNode.style.backgroundColor = snippetBackup.backgroundColor;
+      snippetNode.style.padding = snippetBackup.padding;
+    };
+  }
+
   function shoot(serializedBlob) {
     console.log('Sending shoot message with blob length:', serializedBlob.length);
     vscode.postMessage({
@@ -108,10 +166,6 @@
     document.body.style.backgroundColor = backgroundColor;
     vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } });
   });
-
-  // radiusSnippet.addEventListener('input', () => {
-  //   document.documentElement.style.setProperty('--snippet-radius', `${radiusSnippet.value}px`);
-  // }); // REMOVED corner radius functionality
 
   lineNumbersCheckbox.addEventListener('change', () => {
     toggleLineNumbers(lineNumbersCheckbox.checked);
@@ -236,62 +290,55 @@
       }
     }, 30000); // 30 second timeout
 
-    const width = snippetContainerNode.offsetWidth * 2;
-    const height = snippetContainerNode.offsetHeight * 2;
+    const restore = applyExportStyles();
     const config = {
-      width,
-      height,
-      scale: 2,
-      useCORS: true,
-      allowTaint: true, // Allow tainted canvases for better background capture
-      backgroundColor: null, // Don't force background color, let it capture naturally
-      logging: false,
-      ignoreElements: (element) => {
-        // Ignore the toolbar to prevent it from appearing in screenshots
-        return element.classList.contains('toolbar');
+      bgcolor: backgroundColor,
+      filter: (node) => {
+        return !node.classList || !node.classList.contains('toolbar');
       },
     };
 
-    html2canvas(snippetContainerNode, config)
-      .then((canvas) => {
+    domtoimage
+      .toBlob(snippetContainerNode, config)
+      .then((blob) => {
         clearTimeout(safetyTimeout); // Clear safety timeout on success
-        canvas.toBlob((blob) => {
-          if (blob) {
-            navigator.clipboard
-              .write([
-                new ClipboardItem({
-                  'image/png': blob,
-                }),
-              ])
-              .then(() => {
-                saveBtnText.textContent = 'Copied!';
-                setTimeout(() => {
-                  saveBtnText.textContent = 'Save as PNG';
-                }, 2000);
-                vscode.postMessage({
-                  type: 'copySuccess',
-                  message: 'Screenshot copied to clipboard!',
-                });
-              })
-              .catch((error) => {
-                console.error('Clipboard copy failed:', error);
+        if (blob) {
+          navigator.clipboard
+            .write([
+              new ClipboardItem({
+                'image/png': blob,
+              }),
+            ])
+            .then(() => {
+              saveBtnText.textContent = 'Copied!';
+              setTimeout(() => {
                 saveBtnText.textContent = 'Save as PNG';
-                vscode.postMessage({
-                  type: 'copyError',
-                  message: 'Failed to copy to clipboard. Try saving as file instead.',
-                });
-              })
-              .finally(() => {
-                saveBtn.disabled = false;
+              }, 2000);
+              vscode.postMessage({
+                type: 'copySuccess',
+                message: 'Screenshot copied to clipboard!',
               });
-          } else {
-            throw new Error('Failed to generate image blob');
-          }
-        }, 'image/png');
+            })
+            .catch((error) => {
+              console.error('Clipboard copy failed:', error);
+              saveBtnText.textContent = 'Save as PNG';
+              vscode.postMessage({
+                type: 'copyError',
+                message: 'Failed to copy to clipboard. Try saving as file instead.',
+              });
+            })
+            .finally(() => {
+              restore();
+              saveBtn.disabled = false;
+            });
+        } else {
+          throw new Error('Failed to generate image blob');
+        }
       })
       .catch((error) => {
         clearTimeout(safetyTimeout); // Clear safety timeout on error
         console.error('Screenshot copy failed:', error);
+        restore();
         saveBtn.disabled = false;
         saveBtnText.textContent = 'Save as PNG';
         vscode.postMessage({
@@ -305,8 +352,7 @@
 
   let saveLabelTimer = null;
   saveBtn.addEventListener('click', () => {
-    saveBtn.disabled = true;
-    saveBtnText.textContent = 'Saving…';
+    // Delegate disabling and label updates to shootAll() so shootAll can manage saveBtn state.
     shootAll();
   });
 
@@ -328,47 +374,35 @@
       }
     }, 30000); // 30 second timeout
 
-    const width = snippetContainerNode.offsetWidth * 2;
-    const height = snippetContainerNode.offsetHeight * 2;
-    console.log('Starting html2canvas with dimensions:', width, 'x', height);
-
+    const restore = applyExportStyles();
     const config = {
-      width,
-      height,
-      scale: 2,
-      useCORS: true,
-      allowTaint: true, // Allow tainted canvases for better background capture
-      backgroundColor: null, // Don't force background color, let it capture naturally
-      logging: false,
-      ignoreElements: (element) => {
-        // Ignore the toolbar to prevent it from appearing in screenshots
-        return element.classList.contains('toolbar');
+      bgcolor: backgroundColor,
+      filter: (node) => {
+        return !node.classList || !node.classList.contains('toolbar');
       },
     };
 
     // Add loading state
     snippetContainerNode.style.opacity = '0.7';
-    console.log('Calling html2canvas...');
+    console.log('Calling domtoimage...');
 
-    html2canvas(snippetContainerNode, config)
-      .then((canvas) => {
-        console.log('html2canvas promise resolved');
+    domtoimage
+      .toBlob(snippetContainerNode, config)
+      .then((blob) => {
+        console.log('domtoimage promise resolved');
         clearTimeout(safetyTimeout); // Clear safety timeout on success
         snippetContainerNode.style.opacity = '1';
-        console.log('Converting canvas to blob...');
-        canvas.toBlob((blob) => {
-          console.log('Canvas to blob callback executed');
-          if (blob) {
-            console.log('Blob created successfully, size:', blob.size);
-            serializeBlob(blob, (serializedBlob) => {
-              console.log('Blob serialized, calling shoot function');
-              shoot(serializedBlob);
-            });
-          } else {
-            console.error('Canvas to blob failed - no blob created');
-            throw new Error('Failed to generate image blob');
-          }
-        }, 'image/png');
+        console.log('Converting blob...');
+        if (blob) {
+          console.log('Blob created successfully, size:', blob.size);
+          serializeBlob(blob, (serializedBlob) => {
+            console.log('Blob serialized, calling shoot function');
+            shoot(serializedBlob);
+          });
+        } else {
+          console.error('domtoimage failed - no blob created');
+          throw new Error('Failed to generate image blob');
+        }
       })
       .catch((error) => {
         clearTimeout(safetyTimeout); // Clear safety timeout on error
@@ -383,6 +417,9 @@
           type: 'exportError',
           message: `Screenshot capture failed: ${errorMessage}. Please try again.`,
         });
+      })
+      .finally(() => {
+        restore();
       });
   }
 
