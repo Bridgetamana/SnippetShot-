@@ -1,12 +1,11 @@
 :root {
-  --panel-padding: 16px;
   --shadow-snippet: rgba(0, 0, 0, 0.25) 0 8px 24px;
   --bg: #020617;
-  --container-glass: rgba(255, 255, 255, 0.05);
   --border: rgba(255, 255, 255, 0.1);
   --text: #e2e8f0;
   --muted: #94a3b8;
   --accent: #38bdf8;
+  --snippet-radius: 12px;
 }
 
 * {
@@ -27,19 +26,7 @@ body {
   align-items: center;
   color: var(--text);
   background-color: var(--bg);
-  font-family:
-    'Inter',
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Ubuntu,
-    Cantarell,
-    Noto Sans,
-    Arial,
-    'Apple Color Emoji',
-    'Segoe UI Emoji';
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
   min-height: 100vh;
   background-attachment: fixed;
 }
@@ -103,9 +90,7 @@ body {
   align-items: center;
 }
 
-.toolbar select,
-.toolbar input[type='color'],
-.toolbar input[type='range'] {
+.toolbar input[type='color'] {
   background: rgba(30, 41, 59, 0.8);
   color: var(--text);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -214,14 +199,9 @@ body {
   height: 20px;
 }
 
-.obturateur {
-  display: none !important;
-}
-
 .snippet-initial {
   color: #d8dee9;
   background-color: #2e3440;
-  font-family: 'Inter', sans-serif;
   font-weight: normal;
   font-size: 14px;
   line-height: 22px;

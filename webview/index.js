@@ -4,6 +4,7 @@
   let backgroundColor = '#020617';
   vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
   const snippetNode = document.getElementById('snippet');
+  const snippetContainerNode = document.getElementById('snippet-container');
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
   const bgPicker = document.getElementById('bgPicker');
@@ -35,6 +36,17 @@
   };
 
   function applyExportStyles() {
+    const containerBackup = {
+      background: snippetContainerNode ? snippetContainerNode.style.background : '',
+      border: snippetContainerNode ? snippetContainerNode.style.border : '',
+      padding: snippetContainerNode ? snippetContainerNode.style.padding : '',
+      maxWidth: snippetContainerNode ? snippetContainerNode.style.maxWidth : '',
+      width: snippetContainerNode ? snippetContainerNode.style.width : '',
+      height: snippetContainerNode ? snippetContainerNode.style.height : '',
+      display: snippetContainerNode ? snippetContainerNode.style.display : '',
+      textAlign: snippetContainerNode ? snippetContainerNode.style.textAlign : '',
+      opacity: snippetContainerNode ? snippetContainerNode.style.opacity : '',
+    };
     const snippetBackup = {
       width: snippetNode.style.width,
       display: snippetNode.style.display,
@@ -42,40 +54,33 @@
       backgroundColor: snippetNode.style.backgroundColor,
       padding: snippetNode.style.padding,
     };
-    const wrapper = document.createElement('div');
-    wrapper.style.background = backgroundColor;
-    wrapper.style.border = 'none';
-    wrapper.style.padding = '64px 48px';
-    wrapper.style.maxWidth = 'none';
-    wrapper.style.width = 'fit-content';
-    wrapper.style.height = 'fit-content';
-    wrapper.style.display = 'block';
-    wrapper.style.textAlign = 'center';
+    if (snippetContainerNode) {
+      snippetContainerNode.style.background = backgroundColor;
+      snippetContainerNode.style.border = 'none';
+      snippetContainerNode.style.padding = '64px 48px';
+      snippetContainerNode.style.maxWidth = 'none';
+      snippetContainerNode.style.width = 'fit-content';
+      snippetContainerNode.style.height = 'fit-content';
+      snippetContainerNode.style.display = 'block';
+      snippetContainerNode.style.textAlign = 'center';
+    }
     snippetNode.style.width = 'auto';
     snippetNode.style.height = 'auto';
     snippetNode.style.display = 'inline-block';
     snippetNode.style.margin = '0';
-    const parent = snippetNode.parentElement;
-    const nextSibling = snippetNode.nextSibling;
-    if (parent) {
-      parent.insertBefore(wrapper, snippetNode);
-      wrapper.appendChild(snippetNode);
-    } else {
-      document.body.appendChild(wrapper);
-      wrapper.appendChild(snippetNode);
-    }
 
     return function restore() {
-      if (parent) {
-        if (nextSibling) {
-          parent.insertBefore(snippetNode, nextSibling);
-        } else {
-          parent.appendChild(snippetNode);
-        }
-      } else {
-        document.body.appendChild(snippetNode);
+      if (snippetContainerNode) {
+        snippetContainerNode.style.background = containerBackup.background;
+        snippetContainerNode.style.border = containerBackup.border;
+        snippetContainerNode.style.padding = containerBackup.padding;
+        snippetContainerNode.style.maxWidth = containerBackup.maxWidth;
+        snippetContainerNode.style.width = containerBackup.width;
+        snippetContainerNode.style.height = containerBackup.height;
+        snippetContainerNode.style.display = containerBackup.display;
+        snippetContainerNode.style.textAlign = containerBackup.textAlign;
+        snippetContainerNode.style.opacity = containerBackup.opacity;
       }
-      wrapper.remove();
 
       snippetNode.style.width = snippetBackup.width;
       snippetNode.style.display = snippetBackup.display;
@@ -236,7 +241,7 @@
     };
 
     domtoimage
-      .toBlob(document.querySelector('#snippet').parentElement, config)
+      .toBlob(snippetContainerNode || document.querySelector('#snippet').parentElement, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
         if (blob) {
@@ -313,7 +318,7 @@
       },
     };
 
-    const target = document.querySelector('#snippet').parentElement;
+    const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
     if (target && target.style) target.style.opacity = '0.7';
 
     domtoimage
