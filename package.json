@@ -2,13 +2,13 @@
   "name": "snippetshot",
   "displayName": "SnippetShot",
   "description": "Create beautiful code screenshots right inside VS Code.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
   },
   "license": "MIT",
-  "publisher": "Bridget Amana",
+  "publisher": "Bridget",
   "keywords": [
     "snippetshot",
     "screenshot",
@@ -98,6 +98,7 @@
     "@types/vscode": "^1.90.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
+    "@vscode/vsce": "^3.6.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
