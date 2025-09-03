@@ -16,7 +16,7 @@
   }
 
   const getInitialHtml = (_fontFamily) => {
-    return `<meta charset="utf-8"><div class="snippet-initial"><div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div><div class="snippet-initial-step snippet-initial-step--first"><span class="snippet-initial-step">1. Copy some code from your editor.</span></div><div><span class="snippet-initial-step">2. Paste it here.</span></div><div><span class="snippet-initial-step">3. Click the 📸 button to save!</span></div></div>`;
+    return `<meta charset="utf-8"><div class="snippet-initial"><div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div><div class="snippet-initial-step snippet-initial-step--first"><span class="snippet-initial-step">1. Copy some code from your editor.</span></div><div><span class="snippet-initial-step">2. Paste it here.</span></div><div><span class="snippet-initial-step">3. Click the 📸 button to save or use Ctrl+S (Cmd+S on Mac)!</span></div></div>`;
   };
 
   const serializeBlob = (blob, cb) => {
@@ -319,16 +319,22 @@
     };
 
     const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
-    if (target && target.style) target.style.opacity = '0.7';
+    if (target && target.style) target.style.opacity = '1'; // Ensure full opacity for capture
 
     domtoimage
       .toBlob(target, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
-        if (target && target.style) target.style.opacity = '1';
+        if (target && target.style) {
+          target.style.opacity = '0.7'; // Feedback
+          setTimeout(() => {
+            if (target && target.style) target.style.opacity = '1';
+          }, 500);
+        }
         if (blob) {
           serializeBlob(blob, (serializedBlob) => {
             shoot(serializedBlob);
+            saveBtnText.textContent = 'Saving…';
           });
         } else {
           throw new Error('Failed to generate image blob');
@@ -389,6 +395,8 @@
         } else {
           snippetNode.style.fontVariantLigatures = 'none';
         }
+      } else if (e.data.type === 'save') {
+        shootAll();
       } else if (e.data.type === 'saveSuccess') {
         saveBtnText.textContent = 'Saved!';
         saveBtn.disabled = false;

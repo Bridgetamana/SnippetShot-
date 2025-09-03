@@ -74,6 +74,14 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
+    vscode.commands.registerCommand('snippetshot.save', () => {
+      if (panel) {
+        panel.webview.postMessage({ type: 'save' });
+      }
+    })
+  );
+
+  context.subscriptions.push(
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('snippetshot') || e.affectsConfiguration('editor')) {
         if (panel) {
