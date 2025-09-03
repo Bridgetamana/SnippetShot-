@@ -2,7 +2,7 @@
 
 SnippetShot is a VS Code extension that allows you to create beautiful screenshots of your code with just a few clicks. Customize the background, toggle line numbers, and export your snippet as a high-resolution PNG.
 
-![SnippetShot Demo](demo.gif)
+![SnippetShot Demo](assets/demo.gif)
 
 ## Features
 - A clean and intuitive interface that's a pleasure to use.
@@ -26,10 +26,10 @@ Here are some of the features we're planning to add in the future:
 - [ ] Social media presets
 
 ## Contributing
-We welcome contributions from the community! Please read our [Contributing Guidelines](CONTRIBUTING.md) to learn how you can get involved.
+We welcome contributions from the community! Please read our [Contributing Guidelines](doc/CONTRIBUTING.md) to learn how you can get involved.
 
 ## Code of Conduct
-Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Please note that this project is released with a [Contributor Code of Conduct](doc/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
 ## License
 This project is licensed under the [MIT License](LICENSE).

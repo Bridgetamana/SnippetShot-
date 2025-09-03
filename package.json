@@ -8,7 +8,7 @@
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
   },
   "license": "MIT",
-  "publisher": "Bridget",
+  "publisher": "Bridget Amana",
   "keywords": [
     "snippetshot",
     "screenshot",
@@ -24,7 +24,7 @@
     "color": "#fbfbfb",
     "theme": "light"
   },
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "categories": [
     "Other"
   ],
