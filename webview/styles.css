@@ -99,6 +99,22 @@ body {
   font-size: 12px;
 }
 
+.toolbar input[type='text'] {
+  background: rgba(30, 41, 59, 0.8);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  font-size: 12px;
+  width: 120px;
+}
+
+.toolbar input[type='text']:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
 .toolbar input[type='color'] {
   padding: 0.15rem;
   width: 24px;
@@ -136,6 +152,7 @@ body {
 }
 
 .snippet-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -220,4 +237,19 @@ body {
 
 .snippet-initial-step--first {
   margin-top: 16px;
+}
+
+.attribution-overlay {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 12px;
+  font-family: sans-serif;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  display: none;
+  backdrop-filter: blur(4px);
 }

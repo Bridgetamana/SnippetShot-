@@ -2,7 +2,7 @@
   "name": "snippetshot",
   "displayName": "SnippetShot",
   "description": "Create beautiful code screenshots right inside VS Code.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
@@ -99,6 +99,16 @@
           "description": "Background color of snippet container. Use any value for CSS `background-color`",
           "format": "color-hex",
           "default": "#f2f2f2"
+        },
+        "snippetshot.attributionEnabled": {
+          "type": "boolean",
+          "description": "Enable attribution text overlay on screenshots",
+          "default": false
+        },
+        "snippetshot.attributionText": {
+          "type": "string",
+          "description": "Text to display as attribution on screenshots",
+          "default": "Created with SnippetShot"
         },
         "snippetshot.target": {
           "type": "null",

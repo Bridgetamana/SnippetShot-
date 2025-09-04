@@ -9,6 +9,9 @@
   const saveBtnText = document.getElementById('saveBtnText');
   const bgPicker = document.getElementById('bgPicker');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
+  const attributionEnabled = document.getElementById('attributionEnabled');
+  const attributionText = document.getElementById('attributionText');
+  const attributionOverlay = document.getElementById('attribution-overlay');
 
   const oldState = vscode.getState();
   if (oldState && oldState.innerHTML) {
@@ -115,6 +118,27 @@
     document.body.style.backgroundColor = backgroundColor;
     vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } });
   });
+
+  attributionEnabled.addEventListener('change', () => {
+    updateAttribution();
+  });
+
+  attributionText.addEventListener('input', () => {
+    updateAttribution();
+  });
+
+  attributionText.addEventListener('paste', (e) => {
+    e.stopPropagation();
+  });
+
+  function updateAttribution() {
+    if (attributionEnabled.checked) {
+      attributionOverlay.textContent = attributionText.value;
+      attributionOverlay.style.display = 'block';
+    } else {
+      attributionOverlay.style.display = 'none';
+    }
+  }
 
   lineNumbersCheckbox.addEventListener('change', () => {
     toggleLineNumbers(lineNumbersCheckbox.checked);
@@ -389,6 +413,13 @@
         }
       } else if (e.data.type === 'updateSettings') {
         snippetNode.style.boxShadow = e.data.shadow;
+        if (e.data.attributionEnabled !== undefined) {
+          attributionEnabled.checked = e.data.attributionEnabled;
+        }
+        if (e.data.attributionText) {
+          attributionText.value = e.data.attributionText;
+        }
+        updateAttribution();
         if (e.data.ligature) {
           snippetNode.style.fontVariantLigatures = 'normal';
         } else {

@@ -153,6 +153,8 @@ export function activate(context: vscode.ExtensionContext) {
       type: 'updateSettings',
       shadow: settings.get('shadow'),
       backgroundColor: settings.get('backgroundColor'),
+      attributionEnabled: settings.get('attributionEnabled'),
+      attributionText: settings.get('attributionText'),
       ligature: editorSettings.get('fontLigatures'),
     });
   }

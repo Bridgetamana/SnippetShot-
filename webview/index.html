@@ -16,6 +16,11 @@
         Line numbers
         <input type="checkbox" id="lineNumbers" checked />
       </label>
+      <label>
+        Attribution
+        <input type="checkbox" id="attributionEnabled" />
+        <input type="text" id="attributionText" placeholder="Enter attribution text" />
+      </label>
     </div>
     <div id="snippet-container" class="snippet-container">
       <div id="snippet">
@@ -29,6 +34,7 @@
           <div><span class="snippet-initial-step">3. Click the 📸 button to save!</span></div>
         </div>
       </div>
+      <div id="attribution-overlay" class="attribution-overlay"></div>
     </div>
 
     <div id="save-container">
