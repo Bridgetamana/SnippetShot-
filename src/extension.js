@@ -65,7 +65,7 @@ function activate(context) {
   })
 
   vscode.workspace.onDidChangeConfiguration(e => {
-  if (e.affectsConfiguration('snippetshot') || e.affectsConfiguration('editor')) {
+    if (e.affectsConfiguration('snippetshot') || e.affectsConfiguration('editor')) {
       syncSettings()
     }
   })
@@ -142,7 +142,7 @@ function activate(context) {
     return vscode.window.onDidChangeTextEditorSelection(e => {
       if (e.selections[0] && !e.selections[0].isEmpty) {
         vscode.commands.executeCommand('editor.action.clipboardCopyWithSyntaxHighlightingAction')
-  panel.webview.postMessage({ type: 'update' })
+        panel.webview.postMessage({ type: 'update' })
       }
     })
   }

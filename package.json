@@ -2,7 +2,7 @@
   "name": "snippetshot",
   "displayName": "SnippetShot",
   "description": "Create beautiful code screenshots right inside VS Code.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/Bridgetamana/SnippetShot-.git"
@@ -69,6 +69,15 @@
         "title": "Save SnippetShot"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "snippetshot.activate",
+          "title": "SnippetShot 📸",
+          "group": "navigation"
+        }
+      ]
+    },
     "keybindings": [
       {
         "command": "snippetshot.save",

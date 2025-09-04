@@ -296,8 +296,8 @@
   function shootAll() {
     if (saveBtn.disabled) return;
 
+    saveBtnText.textContent = 'Saving…';
     saveBtn.disabled = true;
-    saveBtnText.textContent = 'Capturing…';
 
     const safetyTimeout = setTimeout(() => {
       if (saveBtn.disabled) {
@@ -334,7 +334,6 @@
         if (blob) {
           serializeBlob(blob, (serializedBlob) => {
             shoot(serializedBlob);
-            saveBtnText.textContent = 'Saving…';
           });
         } else {
           throw new Error('Failed to generate image blob');
