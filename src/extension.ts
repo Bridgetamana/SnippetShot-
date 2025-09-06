@@ -13,16 +13,6 @@ function writeSerializedBlobToFile(serializedBlob: string, fileName: string) {
 export function activate(context: vscode.ExtensionContext) {
   const htmlPath = path.resolve(context.extensionPath, 'webview/index.html');
 
-  const downloadsDir = (() => {
-    const home = homedir();
-    const candidate = path.resolve(home, 'Downloads');
-    try {
-      if (fs.existsSync(candidate)) return candidate;
-    } catch {
-      /* ignore */
-    }
-    return home;
-  })();
   let panel: vscode.WebviewPanel | undefined;
 
   const serializer: vscode.WebviewPanelSerializer = {
@@ -97,31 +87,38 @@ export function activate(context: vscode.ExtensionContext) {
         case 'shoot': {
           const now = new Date();
           const pad = (n: number) => n.toString().padStart(2, '0');
-          const yyyy = now.getFullYear();
-          const mm = pad(now.getMonth() + 1);
-          const dd = pad(now.getDate());
-          const hh = pad(now.getHours());
-          const mi = pad(now.getMinutes());
-          const ss = pad(now.getSeconds());
-          const filename = `codesnippet-${yyyy}${mm}${dd}-${hh}${mi}${ss}.png`;
-          const filePath = path.resolve(downloadsDir, filename);
-          try {
-            writeSerializedBlobToFile(data.serializedBlob, filePath);
-            p.webview.postMessage({ type: 'saveSuccess', fileName: filename, filePath });
-            vscode.window.showInformationMessage(`Saved to Downloads: ${filename}`);
-          } catch (err) {
-            p.webview.postMessage({
-              type: 'saveError',
-              message: (err as Error)?.message || String(err),
+          const defaultName = `codesnippet-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.png`;
+          vscode.window
+            .showSaveDialog({
+              defaultUri: vscode.Uri.file(path.resolve(homedir(), 'Downloads', defaultName)),
+              filters: { Images: ['png'] },
+              saveLabel: 'Save SnippetShot',
+            })
+            .then((uri) => {
+              if (!uri) {
+                p.webview.postMessage({ type: 'saveError', message: 'Save canceled' });
+                return;
+              }
+              try {
+                writeSerializedBlobToFile(data.serializedBlob, uri.fsPath);
+                p.webview.postMessage({
+                  type: 'saveSuccess',
+                  fileName: path.basename(uri.fsPath),
+                  filePath: uri.fsPath,
+                });
+                vscode.window.showInformationMessage(`Saved: ${path.basename(uri.fsPath)}`);
+              } catch (err) {
+                p.webview.postMessage({
+                  type: 'saveError',
+                  message: (err as Error)?.message || String(err),
+                });
+                vscode.window.showErrorMessage('Failed to save image: ' + (err as Error).message);
+              }
             });
-            vscode.window.showErrorMessage('Failed to save image: ' + (err as Error).message);
-          }
           break;
         }
         case 'updateSettingsFromWebview':
-          if (panel) {
-            syncSettings(panel);
-          }
+          // Removed attribution caching (no action needed)
           break;
         case 'getAndUpdateCacheAndSettings':
           p.webview.postMessage({
@@ -161,18 +158,27 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function getHtmlContent(htmlPath: string, webview: vscode.Webview) {
-  const htmlContent = fs.readFileSync(htmlPath, 'utf-8');
-  return htmlContent
+  const raw = fs.readFileSync(htmlPath, 'utf-8');
+  const nonce = Math.random().toString(36).slice(2);
+  const withResources = raw
     .replace(/script src="([^"]*)"/g, (_m, src) => {
       const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), src));
       const webSrc = webview.asWebviewUri(onDisk);
-      return `script src="${webSrc}"`;
+      return `script nonce="${nonce}" src="${webSrc}"`;
     })
     .replace(/link href="([^"]*)"/g, (_m, href) => {
       const onDisk = vscode.Uri.file(path.resolve(path.dirname(htmlPath), href));
       const webHref = webview.asWebviewUri(onDisk);
       return `link href="${webHref}"`;
-    });
+    })
+    .replace(
+      /<meta\s+http-equiv="Content-Security-Policy"[^>]*content="([^"]*)"\s*\/?>/,
+      (m, csp) => {
+        let updated = csp.replace('script-src', `script-src 'nonce-${nonce}'`);
+        return m.replace(csp, updated);
+      }
+    );
+  return withResources;
 }
 
 export function deactivate() {}

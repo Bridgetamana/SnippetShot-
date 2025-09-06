@@ -18,9 +18,13 @@
     snippetNode.innerHTML = oldState.innerHTML;
   }
 
-  const getInitialHtml = (_fontFamily) => {
-    return `<meta charset="utf-8"><div class="snippet-initial"><div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div><div class="snippet-initial-step snippet-initial-step--first"><span class="snippet-initial-step">1. Copy some code from your editor.</span></div><div><span class="snippet-initial-step">2. Paste it here.</span></div><div><span class="snippet-initial-step">3. Click the 📸 button to save or use Ctrl+S (Cmd+S on Mac)!</span></div></div>`;
-  };
+  const initialTemplate = document.getElementById('initial-snippet-template');
+  function applyInitialSnippet() {
+    if (initialTemplate && 'content' in initialTemplate) {
+      snippetNode.innerHTML = '';
+      snippetNode.appendChild(initialTemplate.content.cloneNode(true));
+    }
+  }
 
   const serializeBlob = (blob, cb) => {
     const fileReader = new FileReader();
@@ -133,7 +137,7 @@
 
   function updateAttribution() {
     if (attributionEnabled.checked) {
-      attributionOverlay.textContent = attributionText.value;
+      attributionOverlay.textContent = attributionText.value || 'SnippetShot';
       attributionOverlay.style.display = 'block';
     } else {
       attributionOverlay.style.display = 'none';
@@ -371,11 +375,9 @@
   window.addEventListener('message', (e) => {
     if (e) {
       if (e.data.type === 'init') {
-        const { fontFamily, bgColor } = e.data;
-
-        const initialHtml = getInitialHtml(fontFamily);
-        snippetNode.innerHTML = initialHtml;
-        vscode.setState({ innerHTML: initialHtml });
+        const { bgColor } = e.data;
+        applyInitialSnippet();
+        vscode.setState({ innerHTML: snippetNode.innerHTML });
         toggleLineNumbers(lineNumbersCheckbox.checked);
 
         if (bgColor) {

@@ -23,19 +23,25 @@
       </label>
     </div>
     <div id="snippet-container" class="snippet-container">
-      <div id="snippet">
-        <meta charset="utf-8" />
-        <div class="snippet-initial">
-          <div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div>
-          <div class="snippet-initial-step snippet-initial-step--first">
-            <span class="snippet-initial-step">1. Copy some code from your editor.</span>
-          </div>
-          <div><span class="snippet-initial-step">2. Paste it here.</span></div>
-          <div><span class="snippet-initial-step">3. Click the 📸 button to save!</span></div>
-        </div>
-      </div>
+      <div id="snippet"></div>
       <div id="attribution-overlay" class="attribution-overlay"></div>
     </div>
+
+    <template id="initial-snippet-template">
+      <meta charset="utf-8" />
+      <div class="snippet-initial">
+        <div><span class="snippet-initial-title">Ready to create a SnippetShot?</span></div>
+        <div class="snippet-initial-step snippet-initial-step--first">
+          <span class="snippet-initial-step">1. Copy some code from your editor.</span>
+        </div>
+        <div><span class="snippet-initial-step">2. Paste it here.</span></div>
+        <div>
+          <span class="snippet-initial-step"
+            >3. Click the 📸 button to save or use Ctrl+S (Cmd+S).</span
+          >
+        </div>
+      </div>
+    </template>
 
     <div id="save-container">
       <button id="saveBtn" class="btn" aria-label="Save screenshot">
