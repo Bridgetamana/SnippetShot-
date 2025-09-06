@@ -7,3 +7,14 @@ jsconfig.json
 to-do-list.md
 .gitignore
 **/*.map
+changelog.md
+.github/
+.husky/
+.prettierignore
+.prettierrc
+eslint.config.mjs
+export-manager-example.ts
+commitlint.config.cjs
+yarn.lock
+doc/
+
