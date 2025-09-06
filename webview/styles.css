@@ -253,3 +253,13 @@ body {
   display: none;
   backdrop-filter: blur(4px);
 }
+
+.capture-flash {
+  animation: captureFlash 0.5s ease;
+}
+
+@keyframes captureFlash {
+  0% { opacity: 1; }
+  40% { opacity: 0.65; }
+  100% { opacity: 1; }
+}

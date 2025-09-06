@@ -109,16 +109,6 @@
           "type": "string",
           "description": "Text to display as attribution on screenshots",
           "default": "Created with SnippetShot"
-        },
-        "snippetshot.target": {
-          "type": "null",
-          "description": "Deprecated: always captures container",
-          "default": null
-        },
-        "snippetshot.theme": {
-          "type": "null",
-          "description": "Deprecated: theme selector removed",
-          "default": null
         }
       }
     }

@@ -195,25 +195,15 @@
     }
     return doc.body.innerHTML;
   }
-
   document.addEventListener('paste', (e) => {
     const innerHTML = e.clipboardData.getData('text/html');
     const code = e.clipboardData.getData('text/plain');
     const minIndent = getMinIndent(code);
     const snippetBgColor = getSnippetBgColor(innerHTML);
-
-    if (snippetBgColor) {
-      updateEnvironment(snippetBgColor);
-    }
-
-    let content;
-    if (minIndent !== 0) {
-      content = stripInitialIndent(innerHTML, minIndent);
-    } else {
-      content = innerHTML;
-    }
+    if (snippetBgColor) updateEnvironment(snippetBgColor);
+    const content = minIndent !== 0 ? stripInitialIndent(innerHTML, minIndent) : innerHTML;
     snippetNode.innerHTML = content;
-    vscode.setState({ innerHTML: content }); // Save clean content
+    vscode.setState({ innerHTML: content });
     toggleLineNumbers(lineNumbersCheckbox.checked);
   });
 
@@ -343,17 +333,15 @@
     };
 
     const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
-    if (target && target.style) target.style.opacity = '1'; // Ensure full opacity for capture
+    if (target && target.classList) target.classList.remove('capture-flash');
 
     domtoimage
       .toBlob(target, config)
       .then((blob) => {
         clearTimeout(safetyTimeout);
-        if (target && target.style) {
-          target.style.opacity = '0.7'; // Feedback
-          setTimeout(() => {
-            if (target && target.style) target.style.opacity = '1';
-          }, 500);
+        if (target && target.classList) {
+          void target.offsetWidth;
+          target.classList.add('capture-flash');
         }
         if (blob) {
           serializeBlob(blob, (serializedBlob) => {
@@ -365,7 +353,7 @@
       })
       .catch((error) => {
         clearTimeout(safetyTimeout);
-        if (target && target.style) target.style.opacity = '1';
+        if (target && target.classList) target.classList.remove('capture-flash');
         saveBtn.disabled = false;
         saveBtnText.textContent = 'Save as PNG';
 
