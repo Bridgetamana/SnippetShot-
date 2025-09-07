@@ -6,6 +6,8 @@ SnippetShot is a VS Code extension that allows you to create beautiful screensho
 
 ![Example Output](assets/demo-image.png)
 
+![Example Output](assets/demo-image1.png)
+
 ## Features
 - A clean and intuitive interface that's a pleasure to use.
 - Choose any background color to match your style.

@@ -1,7 +1,7 @@
 {
   "name": "snippetshot",
   "displayName": "SnippetShot",
-  "description": "Create beautiful code screenshots right inside VS Code.",
+  "description": "The fastest way to turn code into shareable images, right inside VS Code.",
   "version": "1.0.0",
   "repository": {
     "type": "git",
