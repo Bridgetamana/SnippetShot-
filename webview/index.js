@@ -561,13 +561,16 @@
         saveBtnText.textContent = 'Save as PNG';
         saveBtn.disabled = false;
       } else if (e.data.type === 'shareSuccess') {
-        shareBtnText.textContent = 'Shared!';
+        shareBtnText.textContent = 'Ready to paste!';
+        shareBtn.classList.add('ready-to-paste');
         shareBtn.disabled = false;
         setTimeout(() => {
           shareBtnText.textContent = 'Share to X';
-        }, 2000);
+          shareBtn.classList.remove('ready-to-paste');
+        }, 5000);
       } else if (e.data.type === 'shareError') {
         shareBtnText.textContent = 'Share to X';
+        shareBtn.classList.remove('ready-to-paste');
         shareBtn.disabled = false;
       }
     }

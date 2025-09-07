@@ -242,6 +242,10 @@ body {
   transform: none !important;
 }
 
+.btn-share.ready-to-paste {
+  background: #10b981;
+}
+
 .snippet-initial {
   color: #d8dee9;
   background-color: #2e3440;

@@ -31,7 +31,7 @@ function handleTwitterShare(
     if (data.imageCopiedToClipboard) {
       vscode.window
         .showInformationMessage(
-          `Twitter/X opened! Image copied to clipboard - paste it directly into your tweet! (Also saved to Downloads/${fileName})`,
+          `Twitter/X opened! Image copied to clipboard - paste it directly into your tweet!`,
           'Show in Folder'
         )
         .then((selection) => {
