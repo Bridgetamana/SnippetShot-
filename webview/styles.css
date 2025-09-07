@@ -90,6 +90,26 @@ body {
   align-items: center;
 }
 
+.bg-controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.toolbar select {
+  background: rgba(30, 41, 59, 0.8);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.toolbar select:hover {
+  background: rgba(30, 41, 59, 1);
+}
+
 .toolbar input[type='color'] {
   background: rgba(30, 41, 59, 0.8);
   color: var(--text);

@@ -2,6 +2,11 @@
 (function () {
   const vscode = acquireVsCodeApi();
   let backgroundColor = '#020617';
+  let backgroundType = 'solid';
+  let gradientColor1 = '#0b1220';
+  let gradientColor2 = '#1e293b';
+  let gradientDirection = 'to bottom';
+
   vscode.postMessage({ type: 'getAndUpdateCacheAndSettings' });
   const snippetNode = document.getElementById('snippet');
   const snippetContainerNode = document.getElementById('snippet-container');
@@ -10,6 +15,12 @@
   const shareBtn = document.getElementById('shareBtn');
   const shareBtnText = document.getElementById('shareBtnText');
   const bgPicker = document.getElementById('bgPicker');
+  const bgType = document.getElementById('bgType');
+  const solidBgControls = document.getElementById('solidBgControls');
+  const gradientBgControls = document.getElementById('gradientBgControls');
+  const gradientColor1Picker = document.getElementById('gradientColor1');
+  const gradientColor2Picker = document.getElementById('gradientColor2');
+  const gradientDirectionSelect = document.getElementById('gradientDirection');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
   const attributionEnabled = document.getElementById('attributionEnabled');
   const attributionText = document.getElementById('attributionText');
@@ -19,6 +30,9 @@
   if (oldState && oldState.innerHTML) {
     snippetNode.innerHTML = oldState.innerHTML;
   }
+
+  toggleBackgroundControls();
+  updateBackground();
 
   const initialTemplate = document.getElementById('initial-snippet-template');
   function applyInitialSnippet() {
@@ -44,10 +58,46 @@
     fileReader.readAsArrayBuffer(blob);
   };
 
+  function getBackgroundValue() {
+    if (backgroundType === 'gradient') {
+      if (gradientDirection === 'circle') {
+        return `radial-gradient(circle, ${gradientColor1}, ${gradientColor2})`;
+      } else {
+        return `linear-gradient(${gradientDirection}, ${gradientColor1}, ${gradientColor2})`;
+      }
+    }
+    return backgroundColor;
+  }
+
+  function updateBackground() {
+    const bgValue = getBackgroundValue();
+    document.body.style.background = bgValue;
+    vscode.postMessage({
+      type: 'updateBgSettings',
+      data: {
+        bgColor: backgroundColor,
+        backgroundType: backgroundType,
+        gradientColor1: gradientColor1,
+        gradientColor2: gradientColor2,
+        gradientDirection: gradientDirection,
+      },
+    });
+  }
+
+  function toggleBackgroundControls() {
+    if (backgroundType === 'solid') {
+      solidBgControls.style.display = 'flex';
+      gradientBgControls.style.display = 'none';
+    } else {
+      solidBgControls.style.display = 'none';
+      gradientBgControls.style.display = 'flex';
+    }
+  }
+
   function applyExportStyles() {
     if (snippetContainerNode) {
       snippetContainerNode.classList.add('export-mode');
-      snippetContainerNode.style.background = backgroundColor;
+      snippetContainerNode.style.background = getBackgroundValue();
     }
     if (snippetNode) {
       snippetNode.classList.add('export-mode');
@@ -86,8 +136,28 @@
 
   bgPicker.addEventListener('input', () => {
     backgroundColor = bgPicker.value;
-    document.body.style.backgroundColor = backgroundColor;
-    vscode.postMessage({ type: 'updateBgColor', data: { bgColor: backgroundColor } });
+    updateBackground();
+  });
+
+  bgType.addEventListener('change', () => {
+    backgroundType = bgType.value;
+    toggleBackgroundControls();
+    updateBackground();
+  });
+
+  gradientColor1Picker.addEventListener('input', () => {
+    gradientColor1 = gradientColor1Picker.value;
+    updateBackground();
+  });
+
+  gradientColor2Picker.addEventListener('input', () => {
+    gradientColor2 = gradientColor2Picker.value;
+    updateBackground();
+  });
+
+  gradientDirectionSelect.addEventListener('change', () => {
+    gradientDirection = gradientDirectionSelect.value;
+    updateBackground();
   });
 
   attributionEnabled.addEventListener('change', () => {
@@ -506,7 +576,13 @@
   window.addEventListener('message', (e) => {
     if (e) {
       if (e.data.type === 'init') {
-        const { bgColor } = e.data;
+        const {
+          bgColor,
+          backgroundType: bgType,
+          gradientColor1: gc1,
+          gradientColor2: gc2,
+          gradientDirection: gd,
+        } = e.data;
         applyInitialSnippet();
         vscode.setState({ innerHTML: snippetNode.innerHTML });
         toggleLineNumbers(lineNumbersCheckbox.checked);
@@ -514,8 +590,25 @@
         if (bgColor) {
           backgroundColor = bgColor;
           bgPicker.value = bgColor;
-          document.body.style.backgroundColor = bgColor;
         }
+        if (bgType) {
+          backgroundType = bgType;
+          bgType.value = bgType;
+        }
+        if (gc1) {
+          gradientColor1 = gc1;
+          gradientColor1Picker.value = gc1;
+        }
+        if (gc2) {
+          gradientColor2 = gc2;
+          gradientColor2Picker.value = gc2;
+        }
+        if (gd) {
+          gradientDirection = gd;
+          gradientDirectionSelect.value = gd;
+        }
+        toggleBackgroundControls();
+        updateBackground();
       } else if (e.data.type === 'update') {
         document.execCommand('paste');
       } else if (e.data.type === 'restore') {
@@ -524,14 +617,48 @@
         if (e.data.bgColor) {
           backgroundColor = e.data.bgColor;
           bgPicker.value = e.data.bgColor;
-          document.body.style.backgroundColor = e.data.bgColor;
         }
+        if (e.data.backgroundType) {
+          backgroundType = e.data.backgroundType;
+          bgType.value = e.data.backgroundType;
+        }
+        if (e.data.gradientColor1) {
+          gradientColor1 = e.data.gradientColor1;
+          gradientColor1Picker.value = e.data.gradientColor1;
+        }
+        if (e.data.gradientColor2) {
+          gradientColor2 = e.data.gradientColor2;
+          gradientColor2Picker.value = e.data.gradientColor2;
+        }
+        if (e.data.gradientDirection) {
+          gradientDirection = e.data.gradientDirection;
+          gradientDirectionSelect.value = e.data.gradientDirection;
+        }
+        toggleBackgroundControls();
+        updateBackground();
       } else if (e.data.type === 'restoreBgColor') {
         if (e.data.bgColor) {
           backgroundColor = e.data.bgColor;
           bgPicker.value = e.data.bgColor;
-          document.body.style.backgroundColor = e.data.bgColor;
         }
+        if (e.data.backgroundType) {
+          backgroundType = e.data.backgroundType;
+          bgType.value = e.data.backgroundType;
+        }
+        if (e.data.gradientColor1) {
+          gradientColor1 = e.data.gradientColor1;
+          gradientColor1Picker.value = e.data.gradientColor1;
+        }
+        if (e.data.gradientColor2) {
+          gradientColor2 = e.data.gradientColor2;
+          gradientColor2Picker.value = e.data.gradientColor2;
+        }
+        if (e.data.gradientDirection) {
+          gradientDirection = e.data.gradientDirection;
+          gradientDirectionSelect.value = e.data.gradientDirection;
+        }
+        toggleBackgroundControls();
+        updateBackground();
       } else if (e.data.type === 'updateSettings') {
         snippetNode.style.boxShadow = e.data.shadow;
         if (e.data.attributionEnabled !== undefined) {
