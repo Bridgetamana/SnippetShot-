@@ -10,6 +10,11 @@ function writeSerializedBlobToFile(serializedBlob: string, fileName: string) {
   fs.writeFileSync(fileName, Buffer.from(bytes));
 }
 
+function generateFilename(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `codesnippet-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}.png`;
+}
+
 export function activate(context: vscode.ExtensionContext) {
   const htmlPath = path.resolve(context.extensionPath, 'webview/index.html');
 
@@ -85,9 +90,7 @@ export function activate(context: vscode.ExtensionContext) {
     p.webview.onDidReceiveMessage(({ type, data }) => {
       switch (type) {
         case 'shoot': {
-          const now = new Date();
-          const pad = (n: number) => n.toString().padStart(2, '0');
-          const defaultName = `codesnippet-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.png`;
+          const defaultName = generateFilename(new Date());
           vscode.window
             .showSaveDialog({
               defaultUri: vscode.Uri.file(path.resolve(homedir(), 'Downloads', defaultName)),

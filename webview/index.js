@@ -166,13 +166,43 @@
     }
     return doc.body.innerHTML;
   }
+  function createPlainTextSnippet(text) {
+    const maxLineLength = 120;
+    const lines = text.split('\n').map((line) => {
+      if (line.length > maxLineLength) {
+        return line.substring(0, maxLineLength) + '...';
+      }
+      return line;
+    });
+
+    const container = document.createElement('div');
+    lines.forEach((line) => {
+      const lineDiv = document.createElement('div');
+      const span = document.createElement('span');
+      span.textContent = line || ' ';
+      lineDiv.appendChild(span);
+      container.appendChild(lineDiv);
+    });
+
+    return container.innerHTML;
+  }
+
   document.addEventListener('paste', (e) => {
     const innerHTML = e.clipboardData.getData('text/html');
     const code = e.clipboardData.getData('text/plain');
-    const minIndent = getMinIndent(code);
-    const snippetBgColor = getSnippetBgColor(innerHTML);
-    if (snippetBgColor) updateEnvironment(snippetBgColor);
-    const content = minIndent !== 0 ? stripInitialIndent(innerHTML, minIndent) : innerHTML;
+
+    let content;
+    if (innerHTML && innerHTML.trim()) {
+      const minIndent = getMinIndent(code);
+      const snippetBgColor = getSnippetBgColor(innerHTML);
+      if (snippetBgColor) updateEnvironment(snippetBgColor);
+      content = minIndent !== 0 ? stripInitialIndent(innerHTML, minIndent) : innerHTML;
+    } else if (code && code.trim()) {
+      content = createPlainTextSnippet(code);
+    } else {
+      return;
+    }
+
     snippetNode.innerHTML = content;
     vscode.setState({ innerHTML: content });
     toggleLineNumbers(lineNumbersCheckbox.checked);
