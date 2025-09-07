@@ -181,6 +181,18 @@ body {
   margin-top: 24px;
   margin-bottom: 24px;
   text-align: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  #save-container {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 
 .btn {
@@ -214,6 +226,20 @@ body {
 .btn svg {
   width: 20px;
   height: 20px;
+}
+
+.btn-share {
+  background: #1d9bf0;
+}
+
+.btn-share:hover {
+  background: #1a8cd8;
+}
+
+.btn-share:disabled {
+  background: #475569;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 .snippet-initial {

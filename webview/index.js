@@ -7,6 +7,8 @@
   const snippetContainerNode = document.getElementById('snippet-container');
   const saveBtn = document.getElementById('saveBtn');
   const saveBtnText = document.getElementById('saveBtnText');
+  const shareBtn = document.getElementById('shareBtn');
+  const shareBtnText = document.getElementById('shareBtnText');
   const bgPicker = document.getElementById('bgPicker');
   const lineNumbersCheckbox = document.getElementById('lineNumbers');
   const attributionEnabled = document.getElementById('attributionEnabled');
@@ -212,8 +214,16 @@
     try {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        if (!saveBtn.disabled) {
-          saveBtn.click();
+        if (e.shiftKey) {
+          // Ctrl+Shift+S (Cmd+Shift+S) for share
+          if (!shareBtn.disabled) {
+            shareBtn.click();
+          }
+        } else {
+          // Ctrl+S (Cmd+S) for save
+          if (!saveBtn.disabled) {
+            saveBtn.click();
+          }
         }
       } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const selection = window.getSelection();
@@ -317,6 +327,120 @@
   saveBtn.addEventListener('click', () => {
     shootAll();
   });
+
+  shareBtn.addEventListener('click', () => {
+    shareToTwitter();
+  });
+
+  function shareToTwitter() {
+    if (shareBtn.disabled || saveBtn.disabled) return;
+
+    shareBtn.disabled = true;
+    shareBtnText.textContent = 'Generating…';
+
+    const safetyTimeout = setTimeout(() => {
+      if (shareBtn.disabled) {
+        shareBtn.disabled = false;
+        shareBtnText.textContent = 'Share to X';
+        vscode.postMessage({
+          type: 'shareError',
+          message: 'Share operation timed out. Please try again.',
+        });
+      }
+    }, 30000);
+
+    const restore = applyExportStyles();
+    const config = {
+      bgcolor: backgroundColor,
+      filter: (node) => {
+        return !node.classList || !node.classList.contains('toolbar');
+      },
+    };
+
+    const target = snippetContainerNode || document.querySelector('#snippet').parentElement;
+    if (target && target.classList) target.classList.remove('capture-flash');
+
+    domtoimage
+      .toBlob(target, config)
+      .then((blob) => {
+        clearTimeout(safetyTimeout);
+        if (target && target.classList) {
+          void target.offsetWidth;
+          target.classList.add('capture-flash');
+        }
+        if (blob) {
+          if (navigator.clipboard && window.ClipboardItem) {
+            navigator.clipboard
+              .write([
+                new ClipboardItem({
+                  'image/png': blob,
+                }),
+              ])
+              .then(() => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const base64 = reader.result.split(',')[1];
+                  vscode.postMessage({
+                    type: 'shareToTwitter',
+                    data: {
+                      imageData: base64,
+                      text: 'Check out this code snippet! Created with #SnippetShot 📸',
+                      imageCopiedToClipboard: true,
+                    },
+                  });
+                };
+                reader.readAsDataURL(blob);
+              })
+              .catch(() => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const base64 = reader.result.split(',')[1];
+                  vscode.postMessage({
+                    type: 'shareToTwitter',
+                    data: {
+                      imageData: base64,
+                      text: 'Check out this code snippet! Created with #SnippetShot 📸',
+                      imageCopiedToClipboard: false,
+                    },
+                  });
+                };
+                reader.readAsDataURL(blob);
+              });
+          } else {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64 = reader.result.split(',')[1];
+              vscode.postMessage({
+                type: 'shareToTwitter',
+                data: {
+                  imageData: base64,
+                  text: 'Check out this code snippet! Created with #SnippetShot 📸',
+                  imageCopiedToClipboard: false,
+                },
+              });
+            };
+            reader.readAsDataURL(blob);
+          }
+        } else {
+          throw new Error('Failed to generate image blob');
+        }
+      })
+      .catch((error) => {
+        clearTimeout(safetyTimeout);
+        if (target && target.classList) target.classList.remove('capture-flash');
+        shareBtn.disabled = false;
+        shareBtnText.textContent = 'Share to X';
+
+        const errorMessage = error.message || 'Unknown error occurred';
+        vscode.postMessage({
+          type: 'shareError',
+          message: `Failed to generate image for sharing: ${errorMessage}. Please try again.`,
+        });
+      })
+      .finally(() => {
+        restore();
+      });
+  }
 
   function shootAll() {
     if (saveBtn.disabled) return;
@@ -436,6 +560,15 @@
       } else if (e.data.type === 'saveError') {
         saveBtnText.textContent = 'Save as PNG';
         saveBtn.disabled = false;
+      } else if (e.data.type === 'shareSuccess') {
+        shareBtnText.textContent = 'Shared!';
+        shareBtn.disabled = false;
+        setTimeout(() => {
+          shareBtnText.textContent = 'Share to X';
+        }, 2000);
+      } else if (e.data.type === 'shareError') {
+        shareBtnText.textContent = 'Share to X';
+        shareBtn.disabled = false;
       }
     }
   });

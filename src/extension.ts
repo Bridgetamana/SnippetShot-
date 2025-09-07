@@ -15,6 +15,65 @@ function generateFilename(date: Date): string {
   return `codesnippet-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}.png`;
 }
 
+function handleTwitterShare(
+  panel: vscode.WebviewPanel,
+  data: { imageData: string; text: string; imageCopiedToClipboard?: boolean }
+) {
+  try {
+    const tweetText = encodeURIComponent(data.text);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+    const tempDir = path.join(homedir(), 'Downloads');
+    const fileName = generateFilename(new Date());
+    const filePath = path.join(tempDir, fileName);
+    const imageBuffer = Buffer.from(data.imageData, 'base64');
+    fs.writeFileSync(filePath, imageBuffer);
+    vscode.env.openExternal(vscode.Uri.parse(twitterUrl));
+    if (data.imageCopiedToClipboard) {
+      vscode.window
+        .showInformationMessage(
+          `Twitter/X opened! Image copied to clipboard - paste it directly into your tweet! (Also saved to Downloads/${fileName})`,
+          'Show in Folder'
+        )
+        .then((selection) => {
+          if (selection === 'Show in Folder') {
+            if (process.platform === 'win32') {
+              vscode.env.openExternal(vscode.Uri.parse(`file:///${tempDir}`));
+            } else {
+              vscode.env.openExternal(vscode.Uri.file(tempDir));
+            }
+          }
+        });
+    } else {
+      vscode.window
+        .showInformationMessage(
+          `Twitter/X opened! Image saved to Downloads/${fileName}. Click the image button in Twitter to attach it to your tweet.`,
+          'Show in Folder',
+          'Copy Image Path'
+        )
+        .then((selection) => {
+          if (selection === 'Show in Folder') {
+            if (process.platform === 'win32') {
+              vscode.env.openExternal(vscode.Uri.parse(`file:///${tempDir}`));
+            } else {
+              vscode.env.openExternal(vscode.Uri.file(tempDir));
+            }
+          } else if (selection === 'Copy Image Path') {
+            vscode.env.clipboard.writeText(filePath);
+            vscode.window.showInformationMessage('Image path copied to clipboard!');
+          }
+        });
+    }
+
+    panel.webview.postMessage({ type: 'shareSuccess' });
+  } catch (error) {
+    panel.webview.postMessage({
+      type: 'shareError',
+      message: `Failed to share: ${(error as Error).message}`,
+    });
+    vscode.window.showErrorMessage(`Failed to share to Twitter/X: ${(error as Error).message}`);
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   const htmlPath = path.resolve(context.extensionPath, 'webview/index.html');
 
@@ -141,6 +200,12 @@ export function activate(context: vscode.ExtensionContext) {
           break;
         case 'exportError':
           vscode.window.showErrorMessage(data.message || 'Screenshot export failed');
+          break;
+        case 'shareToTwitter':
+          handleTwitterShare(p, data);
+          break;
+        case 'shareError':
+          vscode.window.showErrorMessage(data.message || 'Failed to share to Twitter/X');
           break;
       }
     });
