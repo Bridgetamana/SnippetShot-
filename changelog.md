@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/Bridgetamana/SnippetShot-/compare/v0.1.3...v1.0.0) (2025-09-07)
+
+
+### Features
+
+* implement Twitter/X sharing functionality ([c716866](https://github.com/Bridgetamana/SnippetShot-/commit/c716866f4e5c51aa4cd807d07e80c800afe444d0))
+* refactor filename generation ([7bf7564](https://github.com/Bridgetamana/SnippetShot-/commit/7bf7564ffaa71e6273eb8f7a9c371f900067aeff))
+* update export functionality ([5e01587](https://github.com/Bridgetamana/SnippetShot-/commit/5e015870e69f90c1f079526e7e18c2dcdd8cb7ab))
+* update Twitter/X sharing experience ([f8e8319](https://github.com/Bridgetamana/SnippetShot-/commit/f8e8319340206a9c7c359d64ec81f87f211b0b70))
+
 ### 0.1.3 (2025-09-06)
 
 
