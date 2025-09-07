@@ -14,11 +14,14 @@ SnippetShot is a VS Code extension that allows you to create beautiful screensho
 - Keyboard shortcuts: Ctrl+S to save.
 - Add custom text or credits to your screenshots.
 - Your background color choice is saved for next time.
+- Share directly to Twitter/X
 
 ## Getting Started
-1.  **Run the command:** Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`) and search for `SnippetShot`.
-2.  **Copy your code:** Copy the code you want to screenshot from your editor.
-3.  **Save your snippet:** Click the "Save as PNG" button to export or use Ctrl+S.
+1. Open SnippetShot: Command Palette → `SnippetShot`
+2. Selecting automatically copies (VS Code built‑in) and the panel listens for paste.
+3. Paste (if needed): Click into the panel and press Ctrl+V.
+4. Change background, toggle line numbers, set attribution text.
+5. Click the "Save as PNG" button to export or use Ctrl+S.
 
 ## Contributing
 We welcome contributions from the community! Please read our [Contributing Guidelines](doc/CONTRIBUTING.md) to learn how you can get involved.
