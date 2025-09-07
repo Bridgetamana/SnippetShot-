@@ -14,7 +14,6 @@
     "screenshot",
     "snippet",
     "code to image",
-    "png",
     "polacode",
     "carbon",
     "codesnap"
@@ -25,7 +24,7 @@
   },
   "icon": "assets/icon.png",
   "categories": [
-    "Other"
+    "Snippets"
   ],
   "engines": {
     "vscode": "^1.90.0"

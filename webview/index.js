@@ -43,57 +43,22 @@
   };
 
   function applyExportStyles() {
-    const containerBackup = {
-      background: snippetContainerNode ? snippetContainerNode.style.background : '',
-      border: snippetContainerNode ? snippetContainerNode.style.border : '',
-      padding: snippetContainerNode ? snippetContainerNode.style.padding : '',
-      maxWidth: snippetContainerNode ? snippetContainerNode.style.maxWidth : '',
-      width: snippetContainerNode ? snippetContainerNode.style.width : '',
-      height: snippetContainerNode ? snippetContainerNode.style.height : '',
-      display: snippetContainerNode ? snippetContainerNode.style.display : '',
-      textAlign: snippetContainerNode ? snippetContainerNode.style.textAlign : '',
-      opacity: snippetContainerNode ? snippetContainerNode.style.opacity : '',
-    };
-    const snippetBackup = {
-      width: snippetNode.style.width,
-      display: snippetNode.style.display,
-      margin: snippetNode.style.margin,
-      backgroundColor: snippetNode.style.backgroundColor,
-      padding: snippetNode.style.padding,
-    };
     if (snippetContainerNode) {
+      snippetContainerNode.classList.add('export-mode');
       snippetContainerNode.style.background = backgroundColor;
-      snippetContainerNode.style.border = 'none';
-      snippetContainerNode.style.padding = '64px 48px';
-      snippetContainerNode.style.maxWidth = 'none';
-      snippetContainerNode.style.width = 'fit-content';
-      snippetContainerNode.style.height = 'fit-content';
-      snippetContainerNode.style.display = 'block';
-      snippetContainerNode.style.textAlign = 'center';
     }
-    snippetNode.style.width = 'auto';
-    snippetNode.style.height = 'auto';
-    snippetNode.style.display = 'inline-block';
-    snippetNode.style.margin = '0';
+    if (snippetNode) {
+      snippetNode.classList.add('export-mode');
+    }
 
     return function restore() {
       if (snippetContainerNode) {
-        snippetContainerNode.style.background = containerBackup.background;
-        snippetContainerNode.style.border = containerBackup.border;
-        snippetContainerNode.style.padding = containerBackup.padding;
-        snippetContainerNode.style.maxWidth = containerBackup.maxWidth;
-        snippetContainerNode.style.width = containerBackup.width;
-        snippetContainerNode.style.height = containerBackup.height;
-        snippetContainerNode.style.display = containerBackup.display;
-        snippetContainerNode.style.textAlign = containerBackup.textAlign;
-        snippetContainerNode.style.opacity = containerBackup.opacity;
+        snippetContainerNode.classList.remove('export-mode');
+        snippetContainerNode.style.background = '';
       }
-
-      snippetNode.style.width = snippetBackup.width;
-      snippetNode.style.display = snippetBackup.display;
-      snippetNode.style.margin = snippetBackup.margin;
-      snippetNode.style.backgroundColor = snippetBackup.backgroundColor;
-      snippetNode.style.padding = snippetBackup.padding;
+      if (snippetNode) {
+        snippetNode.classList.remove('export-mode');
+      }
     };
   }
 
@@ -150,28 +115,30 @@
 
   function toggleLineNumbers(show) {
     const snippet = document.getElementById('snippet');
+    if (!snippet) return;
+
     const lineContainer = snippet.querySelector('div');
     if (!lineContainer) return;
 
     const existingNumbers = snippet.querySelectorAll('.line-number');
+    if (show && existingNumbers.length > 0) return;
+    if (!show && existingNumbers.length === 0) return;
     existingNumbers.forEach((n) => n.remove());
-    const allLinesForStyleReset = Array.from(snippet.querySelectorAll('div > div'));
-    allLinesForStyleReset.forEach((l) => {
-      if (l.style.display === 'flex') l.style.display = '';
+
+    const allLines = Array.from(snippet.querySelectorAll('div > div'));
+    allLines.forEach((l) => {
+      l.classList.remove('line-numbered');
     });
 
     if (show) {
       const lines = Array.from(lineContainer.children).filter((c) => c.tagName === 'DIV');
-      for (let i = 0; i < lines.length; i++) {
+      lines.forEach((line, i) => {
         const number = document.createElement('span');
-        number.style.color = '#888';
-        number.style.paddingRight = '1em';
-        number.style.userSelect = 'none';
         number.className = 'line-number';
         number.innerText = i + 1;
-        lines[i].style.display = 'flex';
-        lines[i].prepend(number);
-      }
+        line.classList.add('line-numbered');
+        line.prepend(number);
+      });
     }
   }
 
@@ -263,6 +230,16 @@
       .then((blob) => {
         clearTimeout(safetyTimeout);
         if (blob) {
+          if (!navigator.clipboard || !window.ClipboardItem) {
+            saveBtnText.textContent = 'Save as PNG';
+            vscode.postMessage({
+              type: 'copyError',
+              message: 'Clipboard API not supported. Try saving as file instead.',
+            });
+            restore();
+            saveBtn.disabled = false;
+            return;
+          }
           navigator.clipboard
             .write([
               new ClipboardItem({

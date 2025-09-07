@@ -263,3 +263,31 @@ body {
   40% { opacity: 0.65; }
   100% { opacity: 1; }
 }
+
+.line-numbered {
+  display: flex !important;
+}
+
+.line-number {
+  color: #888;
+  padding-right: 1em;
+  user-select: none;
+}
+
+.export-mode.snippet-container {
+  background: var(--bg);
+  border: none;
+  padding: 64px 48px;
+  max-width: none;
+  width: fit-content;
+  height: fit-content;
+  display: block;
+  text-align: center;
+}
+
+.export-mode#snippet {
+  width: auto;
+  height: auto;
+  display: inline-block;
+  margin: 0;
+}
