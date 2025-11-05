@@ -1,4 +1,5 @@
 # SnippetShot 📸
+![Visual Studio Marketplace Downloads](https://img.shields.io/visual-studio-marketplace/d/Bridget.snippetshot)
 
 SnippetShot is a VS Code extension that allows you to create beautiful screenshots of your code with just a few clicks. Customize the background, toggle line numbers, add optional attribution, and export your snippet as a high-resolution PNG.
 
